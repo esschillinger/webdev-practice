@@ -1,0 +1,86 @@
+body {
+    margin: 0;
+}
+
+.hero {
+    display: grid;
+    place-items: center;
+    width: 100dvw;
+    height: 100dvh;
+    background-image: url("/colorful-hero/background.jpg");
+    background-size: cover;
+}
+
+.card, .card * {
+    font-family: 'Open sans', sans-serif;
+}
+
+.card {
+    display: grid;
+    place-items: center;
+    color: white;
+    text-align: center;
+    padding: 5rem 10rem;
+    border-radius: 0.7rem;
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.card__header,
+.card__subheader {
+    margin: 0;
+}
+
+.card__header {
+    margin-top: 1rem;
+    font-size: 5rem;
+    font-weight: 600;
+    max-width: 15ch;
+    line-height: 1.2;
+}
+
+.card__subheader {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.card__details {
+    margin-block: 0;
+    margin-top: 2rem;
+    max-width: 60ch;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+.card__button {
+    position: relative;
+    margin-top: 4rem;
+    padding: 1.5ch 3ch;
+    border-radius: 5rem;
+    color: black;
+    font-weight: bold;
+    background-color: white;
+    border: none;
+    outline-color: transparent;
+    /* border-color: transparent; */
+    cursor: pointer;
+    transition: transform 100ms ease;
+}
+
+.card__button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    transition: background-color 100ms ease;
+}
+
+.card__button:hover::before {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.card__button:active:hover {
+    transform: scale(0.98);
+}
