@@ -19,6 +19,7 @@ body {
 }
 
 .input {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -46,9 +47,10 @@ body {
     background-size: cover;
 }
 
-.input__username {
+.input__collaborator {
     padding: 0.15rem 0.3rem;
-    border-radius: 0.25rem;
+    margin-inline: 0.3rem;
+    border-radius: 0.3rem;
     color: rgb(var(--color-blue));
     background-color: rgba(var(--color-blue), 0.25);
     cursor: pointer;
@@ -56,9 +58,73 @@ body {
                 background-color 250ms ease;
 }
 
-.input__username:hover {
+.input__collaborator:hover,
+.input__collaborator:focus {
+    outline: none;
     color: white;
     background-color: rgba(var(--color-blue), 0.75);
+}
+
+.input__collaborator::selection {
+    display: none;
+}
+
+.input__user-list {
+    position: absolute;
+    left: 0;
+    bottom: -1rem;
+    transform: translateY(100%);
+    font-size: 0.9rem;
+    min-width: 30ch;
+    max-width: 40ch;
+    max-height: 10rem;
+    text-wrap: nowrap;
+    overflow: scroll;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background-color: white;
+    scale: 1;
+    transform-origin: left bottom;
+    transition: scale 250ms ease;
+}
+
+.input__user-list.scale-zero {
+    scale: 0;
+}
+
+.input__user {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 100ms ease;
+}
+
+.input__user:hover {
+    cursor: pointer;
+    background-color: rgba(var(--color-blue), 0.1);
+}
+
+.input__user img {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+}
+
+.input__user-name {
+    font-size: 0.8rem;
+}
+
+.input__user-handle {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.5);
+    /* font-style: italic; */
+}
+
+.input__user-handle::before {
+    content: '@';
 }
 
 .icon-wrapper {

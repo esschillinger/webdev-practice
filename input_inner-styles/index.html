@@ -2,15 +2,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="colors.css">
+    <link rel="stylesheet" href="/utility_classes.css">
+    <link rel="stylesheet" href="/colors.css">
     <link rel="stylesheet" href="styles.css">
     <title>Input with Inner Styling</title>
 </head>
 <body>
     <div class="input">
-        <div class="input__text" contenteditable="true" spellcheck="false" data-state="text" data-placeholder="Share via @username">Hey <span class="input__username">@ivanchurch</span>, come check this out!</div>
+        <div class="input__text" contenteditable="true" list="users" spellcheck="false" data-state="text" data-placeholder="Share via @username">
+            Hey 
+            <span class="input__collaborator" tabindex="0">Ivan Church</span>
+            , come check this out!
+        </div>
         <div class="icon-wrapper">
             <button class="icon input__send"></button>
+        </div>
+        
+        <div class="input__user-list noselect scale-zero">
+            <div class="input__user">
+                <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
+                <div class="input__user-info">
+                    <div class="input__user-name">Ivan Church</div>
+                    <div class="input__user-handle">ivanchurch</div>
+                </div>
+            </div>
+            <div class="input__user">
+                <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
+                <div class="input__user-info">
+                    <div class="input__user-name">Joaquin Adams</div>
+                    <div class="input__user-handle">fil-adams</div>
+                </div>
+            </div>
+            <div class="input__user">
+                <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
+                <div class="input__user-info">
+                    <div class="input__user-name">Ethan Schillinger</div>
+                    <div class="input__user-handle">ethanschill</div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
