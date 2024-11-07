@@ -1,7 +1,12 @@
+let address_book = new Map();
+
+
 $(document).ready(() => {
     $('.input__text').each(function() {
         if ($(this).text() == '') $(this).text($(this).data('placeholder'));
     });
+
+    $('.input__user-info').each(function() { address_book.set($(this).find('.input__user-handle').text(), $(this).find('.input__user-name').text()); });
 });
 
 
@@ -18,17 +23,30 @@ function set_cursor(elem, start = 0) {
 
 
 function make_selection(elem) {
+    console.log('select');
     let range = document.createRange();
     let sel = window.getSelection();
     range.selectNodeContents(elem);
     sel.removeAllRanges();
     sel.addRange(range);
+
+    console.log($(':focus'));
+    
     elem.focus();
 }
 
 
-function validate_username(input) {
+function validate_username(username) {
+    for (const handle of address_book.keys()) {
+        if (username == handle) {
+            // $('.input__collaborator').text(address_book.get(handle));
+            $('.input__collaborator').addClass('handle-validated');
+            return;
+        }
+    }
 
+    // TODO UNCOMMENT
+    $('.input__collaborator').contents().unwrap();
 }
 
 
@@ -44,7 +62,7 @@ $('.input__text').on('click', function() {
         let username = $(this).find('.input__collaborator');
         if (username.length && username.is(':focus')) make_selection(username.get(0));
     }
-
+    
 }).on('input', function(e) {
     if (this.dataset.state == 'placeholder') {
         let char = $(this).text().substring(0, 1);
@@ -65,13 +83,13 @@ $('.input__text').on('click', function() {
             $('.input__user-handle').each(function() {
                 let input_user = $(this).closest('.input__user');
     
-                if ($(this).text().includes(collaborator.text())) input_user.show();
+                if ($(this).text().includes(collaborator.text().substring(1))) input_user.show();
                 else input_user.hide();
             });
         }
     } else {
         // if (collaborator.text() == '') {
-        $('.input__user-list').addClass('scale-zero');
+        $('.input__address-book').addClass('scale-zero');
         $('.input__text').focus();
         // }
 
@@ -83,24 +101,33 @@ $('.input__text').on('click', function() {
             let start_index = text.indexOf('@');
             let preamble = text.substring(0, start_index);
             let closing_remarks = text.substring(start_index + 1);
-            console.log(start_index);
 
             $(this).html(`${preamble}<span class="input__collaborator" tabindex="0">@</span> ${closing_remarks}`);
-            $('.input__collaborator').trigger('focus');
-            make_selection($('.input__collaborator').get(0));
+            set_cursor($('.input__collaborator').get(0), 1, 1); // will focus the element as well
         }
     }
 });
 
 
-$(document).on('click', '.input__collaborator', function() {
+$(document).on('mousedown', '.input__collaborator', function() {
     make_selection(this);
     
+}).on('mouseup', (e) => {
+    e.preventDefault();
+
 }).on('focus', '.input__collaborator', function() {
-    $('.input__user-list').removeClass('scale-zero');
+    $('.input__address-book').removeClass('scale-zero');
 
 }).on('blur', '.input__collaborator', function() {
-    $('.input__user-list').addClass('scale-zero');
+    $('.input__address-book').addClass('scale-zero');
     $('.input__user').show();
-    validate_username($(this).text());
+    validate_username($(this).text().substring(1));
+});
+
+
+$('.input__address-book > .input__user').on('mousedown', function() {
+    let collaborator = $('.input__collaborator');
+    
+    collaborator.text('@' + $(this).find('.input__user-handle').text());
+    collaborator.addClass('handle-validated');
 });

@@ -51,6 +51,9 @@ body {
     padding: 0.15rem 0.3rem;
     margin-inline: 0.3rem;
     border-radius: 0.3rem;
+}
+
+.input__collaborator.handle-validated {
     color: rgb(var(--color-blue));
     background-color: rgba(var(--color-blue), 0.25);
     cursor: pointer;
@@ -58,8 +61,8 @@ body {
                 background-color 250ms ease;
 }
 
-.input__collaborator:hover,
-.input__collaborator:focus {
+.input__collaborator.handle-validated:hover,
+.input__collaborator.handle-validated:focus {
     outline: none;
     color: white;
     background-color: rgba(var(--color-blue), 0.75);
@@ -69,7 +72,7 @@ body {
     display: none;
 }
 
-.input__user-list {
+.input__address-book {
     position: absolute;
     left: 0;
     bottom: -1rem;
@@ -88,7 +91,7 @@ body {
     transition: scale 250ms ease;
 }
 
-.input__user-list.scale-zero {
+.input__address-book.scale-zero {
     scale: 0;
 }
 
