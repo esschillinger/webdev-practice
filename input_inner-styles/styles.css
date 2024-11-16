@@ -18,7 +18,7 @@ body {
     background: no-repeat linear-gradient(white, #fdeddf);
 }
 
-.input {
+.custom-input {
     position: relative;
     display: flex;
     align-items: center;
@@ -29,31 +29,31 @@ body {
     background-color: white;
 }
 
-.input__text {
+.custom-input__text {
     /* background: white; */
     min-width: 30ch;
     outline: none;
 }
 
-.input__text[data-state="placeholder"] {
+.custom-input__text[data-state="placeholder"] {
     color: rgba(0, 0, 0, 0.5);
     font-style: italic;
 }
 
-.input__send {
+.custom-input__send {
     background: none;
     border: none;
     background-image: url("arrow-up-solid.svg");
     background-size: cover;
 }
 
-.input__collaborator {
+.custom-input__collaborator {
     padding: 0.15rem 0.3rem;
     margin-inline: 0.3rem;
     border-radius: 0.3rem;
 }
 
-.input__collaborator.handle-validated {
+.custom-input__collaborator.handle-validated {
     color: rgb(var(--color-blue));
     background-color: rgba(var(--color-blue), 0.25);
     cursor: pointer;
@@ -61,18 +61,18 @@ body {
                 background-color 250ms ease;
 }
 
-.input__collaborator.handle-validated:hover,
-.input__collaborator.handle-validated:focus {
+.custom-input__collaborator.handle-validated:hover,
+.custom-input__collaborator.handle-validated:focus {
     outline: none;
     color: white;
     background-color: rgba(var(--color-blue), 0.75);
 }
 
-.input__collaborator::selection {
+.custom-input__collaborator::selection {
     display: none;
 }
 
-.input__address-book {
+.custom-input__address-book {
     position: absolute;
     left: 0;
     bottom: -1rem;
@@ -91,11 +91,11 @@ body {
     transition: scale 250ms ease;
 }
 
-.input__address-book.scale-zero {
+.custom-input__address-book.scale-zero {
     scale: 0;
 }
 
-.input__user {
+.custom-input__user {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -104,36 +104,36 @@ body {
     transition: background-color 100ms ease;
 }
 
-.input__user:hover {
+.custom-input__user:hover {
     cursor: pointer;
     background-color: rgba(var(--color-blue), 0.1);
 }
 
-.input__user img {
+.custom-input__user img {
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 50%;
 }
 
-.input__user-name {
+.custom-input__user-name {
     font-size: 0.8rem;
 }
 
-.input__user-handle {
+.custom-input__user-handle {
     font-size: 0.7rem;
     font-weight: 300;
     color: rgba(0, 0, 0, 0.5);
     /* font-style: italic; */
 }
 
-.input__user-handle::before {
+.custom-input__user-handle::before {
     content: '@';
 }
 
 .icon-wrapper {
     position: relative;
-    border-radius: 0.75rem;
-    padding: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
 }
 
 .icon-wrapper::before {
@@ -154,7 +154,7 @@ body {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-.input:has(.input__text:not([data-state="placeholder"])) .icon-wrapper:has(.input__send) {
+.custom-input:has(.custom-input__collaborator[data-handle]) .icon-wrapper:has(.custom-input__send) {
     background-color: rgb(var(--color-viridian));
     cursor: pointer;
 }

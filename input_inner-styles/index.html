@@ -8,36 +8,36 @@
     <title>Input with Inner Styling</title>
 </head>
 <body>
-    <div class="input">
-        <div class="input__text" contenteditable="true" list="users" spellcheck="false" data-state="text" data-placeholder="Share via @username">
+    <div class="custom-input">
+        <div class="custom-input__text" contenteditable="true" list="users" spellcheck="false" data-state="text" data-placeholder="Share via @username">
             Hey 
-            <span class="input__collaborator handle-validated" tabindex="0">@ivanchurch</span>
+            <span class="custom-input__collaborator handle-validated" tabindex="0" data-handle="ivanchurch">@ivanchurch</span>
             , come check this out!
         </div>
         <div class="icon-wrapper">
-            <button class="icon input__send"></button>
+            <button class="icon custom-input__send"></button>
         </div>
         
-        <div class="input__address-book noselect scale-zero">
-            <div class="input__user">
+        <div class="custom-input__address-book noselect scale-zero">
+            <div class="custom-input__user">
                 <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
-                <div class="input__user-info">
-                    <div class="input__user-name">Ivan Church</div>
-                    <div class="input__user-handle">ivanchurch</div>
+                <div class="custom-input__user-info">
+                    <div class="custom-input__user-name">Ivan Church</div>
+                    <div class="custom-input__user-handle">ivanchurch</div>
                 </div>
             </div>
-            <div class="input__user">
+            <div class="custom-input__user">
                 <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
-                <div class="input__user-info">
-                    <div class="input__user-name">Joaquin Adams</div>
-                    <div class="input__user-handle">fil-adams</div>
+                <div class="custom-input__user-info">
+                    <div class="custom-input__user-name">Joaquin Adams</div>
+                    <div class="custom-input__user-handle">fil-adams</div>
                 </div>
             </div>
-            <div class="input__user">
+            <div class="custom-input__user">
                 <img src="/input_inner-styles/avatar.webp" alt="Profile Photo">
-                <div class="input__user-info">
-                    <div class="input__user-name">Ethan Schillinger</div>
-                    <div class="input__user-handle">ethanschill</div>
+                <div class="custom-input__user-info">
+                    <div class="custom-input__user-name">Ethan Schillinger</div>
+                    <div class="custom-input__user-handle">ethanschill</div>
                 </div>
             </div>
         </div>

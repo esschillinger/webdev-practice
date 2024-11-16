@@ -2,11 +2,11 @@ let address_book = new Map();
 
 
 $(document).ready(() => {
-    $('.input__text').each(function() {
+    $('.custom-input__text').each(function() {
         if ($(this).text() == '') $(this).text($(this).data('placeholder'));
     });
 
-    $('.input__user-info').each(function() { address_book.set($(this).find('.input__user-handle').text(), $(this).find('.input__user-name').text()); });
+    $('.custom-input__user-info').each(function() { address_book.set($(this).find('.custom-input__user-handle').text(), $(this).find('.custom-input__user-name').text()); });
 });
 
 
@@ -39,18 +39,19 @@ function make_selection(elem) {
 function validate_username(username) {
     for (const handle of address_book.keys()) {
         if (username == handle) {
-            // $('.input__collaborator').text(address_book.get(handle));
-            $('.input__collaborator').addClass('handle-validated');
+            // $('.custom-input__collaborator').text(address_book.get(handle));
+            $('.custom-input__collaborator').addClass('handle-validated');
+            $('.custom-input__collaborator').get(0).dataset.handle = handle;
+
             return;
         }
     }
 
-    // TODO UNCOMMENT
-    $('.input__collaborator').contents().unwrap();
+    $('.custom-input__collaborator').contents().unwrap();
 }
 
 
-$('.input__text').on('click', function() {
+$('.custom-input__text').on('click', function() {
     if (this.dataset.state == 'placeholder') set_cursor(this);
 
 }).on('keyup', function(e) {
@@ -59,7 +60,7 @@ $('.input__text').on('click', function() {
 
     // tabbing to a username span should focus it and select all inner text
     if (e.which == 9) {
-        let username = $(this).find('.input__collaborator');
+        let username = $(this).find('.custom-input__collaborator');
         if (username.length && username.is(':focus')) make_selection(username.get(0));
     }
     
@@ -75,13 +76,13 @@ $('.input__text').on('click', function() {
     if (this.dataset.state == 'placeholder') $(this).text($(this).data('placeholder'));
 
     // filter "datalist" if user is typing in a span
-    let collaborator = $('.input__collaborator');
+    let collaborator = $('.custom-input__collaborator');
     if (collaborator.length) {
         if (collaborator.is(':focus')) {
             // filter "datalist" with the search results
     
-            $('.input__user-handle').each(function() {
-                let input_user = $(this).closest('.input__user');
+            $('.custom-input__user-handle').each(function() {
+                let input_user = $(this).closest('.custom-input__user');
     
                 if ($(this).text().includes(collaborator.text().substring(1))) input_user.show();
                 else input_user.hide();
@@ -89,8 +90,8 @@ $('.input__text').on('click', function() {
         }
     } else {
         // if (collaborator.text() == '') {
-        $('.input__address-book').addClass('scale-zero');
-        $('.input__text').focus();
+        $('.custom-input__address-book').addClass('scale-zero');
+        $('.custom-input__text').focus();
         // }
 
         if (e.originalEvent.data == '@') {
@@ -102,32 +103,39 @@ $('.input__text').on('click', function() {
             let preamble = text.substring(0, start_index);
             let closing_remarks = text.substring(start_index + 1);
 
-            $(this).html(`${preamble}<span class="input__collaborator" tabindex="0">@</span> ${closing_remarks}`);
-            set_cursor($('.input__collaborator').get(0), 1, 1); // will focus the element as well
+            $(this).html(`${preamble}<span class="custom-input__collaborator" tabindex="0">@</span> ${closing_remarks}`);
+            set_cursor($('.custom-input__collaborator').get(0), 1, 1); // will focus the element as well
         }
     }
 });
 
 
-$(document).on('mousedown', '.input__collaborator', function() {
+$(document).on('mousedown', '.custom-input__collaborator', function() {
     make_selection(this);
     
 }).on('mouseup', (e) => {
     e.preventDefault();
 
-}).on('focus', '.input__collaborator', function() {
-    $('.input__address-book').removeClass('scale-zero');
+}).on('focus', '.custom-input__collaborator', function() {
+    $('.custom-input__address-book').removeClass('scale-zero');
 
-}).on('blur', '.input__collaborator', function() {
-    $('.input__address-book').addClass('scale-zero');
-    $('.input__user').show();
+}).on('blur', '.custom-input__collaborator', function() {
+    $('.custom-input__address-book').addClass('scale-zero');
+    $('.custom-input__user').show();
     validate_username($(this).text().substring(1));
 });
 
 
-$('.input__address-book > .input__user').on('mousedown', function() {
-    let collaborator = $('.input__collaborator');
+$('.custom-input__address-book > .custom-input__user').on('mousedown', function() {
+    let collaborator = $('.custom-input__collaborator');
     
-    collaborator.text('@' + $(this).find('.input__user-handle').text());
+    collaborator.text('@' + $(this).find('.custom-input__user-handle').text());
     collaborator.addClass('handle-validated');
+});
+
+
+$('.icon-wrapper:has(.custom-input__send)').on('click', () => {
+    validate_username($('.custom-input__collaborator').text().substring(1));
+    if ($('.custom-input__collaborator').length) window.alert('Send to server: ' + $('.custom-input__collaborator').get(0).dataset.handle);
+    else window.alert('No valid username present');
 });
