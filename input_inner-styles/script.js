@@ -113,7 +113,7 @@ $('.custom-input__text').on('click', function() {
 $(document).on('mousedown', '.custom-input__collaborator', function() {
     make_selection(this);
     
-}).on('mouseup', (e) => {
+}).on('mouseup', '.custom-input__collaborator', (e) => {
     e.preventDefault();
 
 }).on('focus', '.custom-input__collaborator', function() {

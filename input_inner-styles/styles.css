@@ -30,7 +30,6 @@ body {
 }
 
 .custom-input__text {
-    /* background: white; */
     min-width: 30ch;
     outline: none;
 }
