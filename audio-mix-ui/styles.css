@@ -19,6 +19,8 @@ body {
 }
 
 .mixer {
+    /* duration in seconds (for now) */
+    --_duration: 20;
     --_bg-color: hsl(0, 0%, 50%);
     --_accent-color: #ffd2a7;
     /* --_track-count: 5; */

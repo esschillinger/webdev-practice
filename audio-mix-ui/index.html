@@ -12,18 +12,16 @@
             1. scroll or CTRL + scroll while .track-grid hover zooms in/out
                 1.a. also decreases the time interval for snap-to-grid
             2. snap-to-grid to move audio tracks
-            3. create waveforms from audio
-                3.a. different colors for each set of grouped audio files
-            4. replace segmented .track-grid with a timeline along the top (less clutter)
-            5. manipulate audio with right click
-                5.a. probably need to use preventDefault()
-                5.b. options
-                    5.b.1. crop
-                    5.b.2. adjust volume (maybe make the controls easier to use than a right-click menu option?)
-                    5.b.3. toggle (mute/unmute)
-                    5.b.4. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
-            6. true audio mixing
-                6.a. add effects (reverb, filters, etc)
+            3. replace segmented .track-grid with a timeline along the top (less clutter)
+            4. manipulate audio with right click
+                4.a. probably need to use preventDefault()
+                4.b. options
+                    4.b.1. crop
+                    4.b.2. adjust volume (maybe make the controls easier to use than a right-click menu option?)
+                    4.b.3. toggle (mute/unmute)
+                    4.b.4. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
+            5. true audio mixing
+                5.a. add effects (reverb, filters, etc)
      -->
     
     <div class="mixer">
@@ -39,14 +37,20 @@
                 <div class="timeline-wrapper">
                     <div class="timeline"></div>
                 </div>
-                
+
                 <div class="track-list">
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-file="test_audio.ogg" data-title="My audio file"></div>
                     </div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
+                    <div class="track">
+                        <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                    </div>
+                    <div class="track">
+                        <div class="audio-wrapper" style="--_color: hsl(0, 70%, 48%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                    </div>
+                    <div class="track">
+                        <div class="audio-wrapper" style="--_color: hsl(136, 54%, 43%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                    </div>
                     <div class="track"></div>
                     <div class="track"></div>
                     <div class="track"></div>

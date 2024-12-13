@@ -17,36 +17,79 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelectorAll('.audio-wrapper').forEach((elem) => {
     const css = elem.style.cssText;
     const color_property = css.split(";").find(style => style.includes("--_color"));
-    const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(";"));
-
-    const h = parseInt(color.slice(color.indexOf("(") + 1, color.indexOf(",")));
-    const s = parseInt(color.slice(color.indexOf(",") + 2, color.indexOf("%,")));
-    const l = parseInt(color.slice(color.indexOf("%,") + 3, color.indexOf("%)")));
+    const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
 
     const height = elem.getBoundingClientRect().height;
 
     let wavesurfer = WaveSurfer.create({
         container : elem,
         height: height,
-        waveColor : `hsl(${h}, ${s}%, ${l * 1.25}%)`, // var(--_color-lighter)
+        waveColor: `hsl(from ${color} h s calc(l * 1.25) )`,
         progressColor : color, // var(--_color)
-        cursorColor: 'transparent',
-        url : 'test_audio.ogg',
+        cursorColor: "transparent",
+        url : "test_audio.ogg",
     });
 
     wavesurfers.push(wavesurfer);
 
-    wavesurfer.on('interaction', () => {
-        wavesurfer.play();
-    });
+    // wavesurfer.on("interaction", () => {
+    //     wavesurfer.play();
+    // });
 });
 
 
-scroll_container.addEventListener('click', function(e) {
+let draggable_audio;
+let initial_audio_left;
+
+
+scroll_container.addEventListener("mousedown", function(e) {
+    e.preventDefault();
     const container_rect = this.getBoundingClientRect();
     const left_margin = container_rect.left;
-    // const top_margin = container_rect.top;
 
-    const relative_left = this.scrollLeft + e.clientX - left_margin;
-    slider.style.left = `${relative_left}px`;
-})
+    const cursor_left = this.scrollLeft + e.clientX - left_margin;
+    
+    // 
+    if (e.target.offsetParent && e.target.offsetParent.classList.contains("audio-wrapper")) {
+        draggable_audio = e.target.offsetParent;
+        initial_audio_left = e.clientX - draggable_audio.getBoundingClientRect().left;
+        draggable_audio.draggable = true;
+    } else {
+        slider.style.left = `${cursor_left}px`;
+    }
+});
+
+
+scroll_container.addEventListener("mouseup", function(e) {
+    if (draggable_audio) {
+        draggable_audio.draggable = false;
+        draggable_audio = null;
+        initial_audio_left = null;
+    }
+});
+
+
+scroll_container.addEventListener("mousemove", function(e) {
+    if (draggable_audio) {
+        const container_rect = scroll_container.getBoundingClientRect();
+        const left_margin = container_rect.left;
+        // const top_margin = container_rect.top;
+
+        const audio_rect = draggable_audio.getBoundingClientRect();
+
+        const cursor_left = scroll_container.scrollLeft + e.clientX - left_margin; // cursor left, relative to scroll container
+        if (!draggable_audio.style.left) {
+            draggable_audio.style.left = audio_rect.left;
+        }
+
+        const track_width = track_list.getBoundingClientRect().width;
+        let new_audio_left = cursor_left - initial_audio_left;
+        if (new_audio_left < 0) new_audio_left = 0;
+        else if (new_audio_left + audio_rect.width > track_width) {
+            new_audio_left = track_width - audio_rect.width;
+        }
+        
+        draggable_audio.style.left = new_audio_left;
+        // console.log(cursor_left, audio_left, cursor_left - audio_left);
+    }
+});
