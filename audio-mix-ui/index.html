@@ -24,10 +24,10 @@
                 5.a. add effects (reverb, filters, etc)
      -->
     
-    <div class="mixer">
+    <div class="mixer" style="--_duration: 20; --_timeline-width: 50px;">
         <div class="main-wrapper">
             <div class="track-controls">
-                bruh
+                
             </div>
     
             
@@ -36,6 +36,7 @@
                 
                 <div class="timeline-wrapper">
                     <div class="timeline">
+                        <!-- <div class="grid-space"></div>
                         <div class="grid-space"></div>
                         <div class="grid-space"></div>
                         <div class="grid-space"></div>
@@ -64,23 +65,22 @@
                         <div class="grid-space"></div>
                         <div class="grid-space"></div>
                         <div class="grid-space"></div>
-                        <div class="grid-space"></div>
-                        <div class="grid-space"></div>
+                        <div class="grid-space"></div> -->
                     </div>
                 </div>
 
                 <div class="track-list">
                     <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-id="0" data-file="test_audio.ogg" data-title="My audio file"></div>
                     </div>
                     <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                        <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-id="1" data-file="test_audio.ogg" data-title="My audio file"></div>
                     </div>
                     <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(0, 70%, 48%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                        <div class="audio-wrapper" style="--_color: hsl(0, 70%, 48%);" data-id="2" data-file="test_audio.ogg" data-title="My audio file"></div>
                     </div>
                     <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(136, 54%, 43%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                        <div class="audio-wrapper" style="--_color: hsl(136, 54%, 43%);" data-id="3" data-file="test_audio.ogg" data-title="My audio file"></div>
                     </div>
                     <div class="track"></div>
                     <div class="track"></div>
@@ -99,7 +99,7 @@
 
 
         <div class="controls">
-            <button>Play</button>
+            <button class="play-button">Play</button>
             <input type="range" class="time-controls" min="0" max="100" value="50"> <!-- use ms or 1/100s -->
             <button>Settings</button>
         </div>

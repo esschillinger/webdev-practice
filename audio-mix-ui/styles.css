@@ -20,11 +20,13 @@ body {
 
 .mixer {
     /* duration in seconds (for now) */
-    --_duration: 30;
-    --_track-width: 1500px;
+    --_duration: 40;
+    --_timeline-width: 100px;
+    --_track-width: calc(var(--_duration) * var(--_timeline-width));
     --_bg-color: hsl(0, 0%, 50%);
     --_accent-color: #ffd2a7;
     /* --_track-count: 5; */
+
     isolation: isolate;
     position: relative;
     width: 80dvw;
@@ -113,7 +115,7 @@ body {
         --_timeline-std-height: 20px;
         display: grid;
         grid-template-rows: calc(var(--_timeline-std-height) * 2);
-        grid-template-columns: repeat(var(--_duration), 50px);
+        grid-template-columns: repeat(var(--_duration), var(--_timeline-width));
     }
     
     & .timeline > *:not(:nth-child(5n)) {
@@ -160,9 +162,9 @@ body {
         content: attr(data-title);
         position: absolute;
         inset: 0;
-        width: fit-content;
         height: fit-content;
         white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
         padding-inline: 1ch;
         color: var(--_color-darker);

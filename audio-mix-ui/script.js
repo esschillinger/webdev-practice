@@ -6,19 +6,45 @@ const scroll_container = document.querySelector('.mixer .scroll-wrapper');
 const slider = document.querySelector('.mixer .slider');
 const timeline = document.querySelector('.mixer .timeline');
 const track_list = document.querySelector('.mixer .track-list');
+const play_button = document.querySelector('button.play-button');
 
-let wavesurfers = [];
+let wavesurfers = new Map();
+let track_duration;
+
+let draggable_audio;
+let initial_audio_left;
+
+let demo_playing = false;
+
+
+function get_custom_property(property, styles) {
+    const prop = styles.split(";").find(style => style.includes(property));
+    const value = prop.slice(prop.indexOf(":") + 1);
+
+    return value;
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
     slider.style.height = `${track_list.getBoundingClientRect().height + timeline.getBoundingClientRect().height}px`;
+
+    track_duration = parseInt(get_custom_property("--_duration", mixer.style.cssText));
+
+    for (let i = 0; i < track_duration; i++) {
+        let grid_space = document.createElement("div");
+        grid_space.classList.add("grid-space");
+
+        timeline.appendChild(grid_space);
+    }
 });
 
 
 document.querySelectorAll('.audio-wrapper').forEach((elem) => {
-    const css = elem.style.cssText;
-    const color_property = css.split(";").find(style => style.includes("--_color"));
-    const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
+    // const css = elem.style.cssText;
+    // const color_property = css.split(";").find(style => style.includes("--_color"));
+    // const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
 
+    const color = get_custom_property("--_color", elem.style.cssText);
     const height = elem.getBoundingClientRect().height;
 
     let wavesurfer = WaveSurfer.create({
@@ -30,20 +56,20 @@ document.querySelectorAll('.audio-wrapper').forEach((elem) => {
         url : "test_audio.ogg",
     });
 
-    wavesurfers.push(wavesurfer);
+    wavesurfers.set(elem.dataset.id, wavesurfer);
 
     wavesurfer.on("ready", () => {
-        console.log(wavesurfer.getDuration());
+        const track_width = track_list.getBoundingClientRect().width;
+        // console.log(track_width);
+        const ratio = wavesurfer.getDuration() / track_duration;
+
+        elem.style.width = ratio * track_width;
     });
 
     // wavesurfer.on("interaction", () => {
     //     wavesurfer.play();
     // });
 });
-
-
-let draggable_audio;
-let initial_audio_left;
 
 
 scroll_container.addEventListener("mousedown", function(e) {
@@ -96,4 +122,21 @@ scroll_container.addEventListener("mousemove", function(e) {
         draggable_audio.style.left = new_audio_left;
         // console.log(cursor_left, audio_left, cursor_left - audio_left);
     }
+});
+
+
+play_button.addEventListener("click", () => {
+    demo_playing = true;
+
+    slider.style.left = 0;
+
+    document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
+        const left = elem.style.left === "" ? 0 : parseInt(elem.style.left);
+        const ratio = left / parseInt(track_list.getBoundingClientRect().width);
+        const delay = ratio * track_duration * 1000; // convert s to ms
+
+        setTimeout(() => {
+            wavesurfers.get(elem.dataset.id).play();
+        }, delay);
+    });
 });
