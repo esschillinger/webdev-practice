@@ -20,7 +20,8 @@ body {
 
 .mixer {
     /* duration in seconds (for now) */
-    --_duration: 20;
+    --_duration: 30;
+    --_track-width: 1500px;
     --_bg-color: hsl(0, 0%, 50%);
     --_accent-color: #ffd2a7;
     /* --_track-count: 5; */
@@ -105,13 +106,24 @@ body {
     top: 0;
     background: var(--_bg-color);
     border-bottom: 5px solid yellow;
-    width: 1500px;
+    width: var(--_track-width);
     /* border-bottom: 5px solid var(--_accent-color); */
 
     & .timeline {
+        --_timeline-std-height: 20px;
         display: grid;
-        grid-template-rows: 20px;
-        grid-template-columns: repeat(30, 50px);
+        grid-template-rows: calc(var(--_timeline-std-height) * 2);
+        grid-template-columns: repeat(var(--_duration), 50px);
+    }
+    
+    & .timeline > *:not(:nth-child(5n)) {
+        height: var(--_timeline-std-height);
+        border-left: 1px solid hsl(from var(--_bg-color) h s calc(l * 1.1));
+        border-right: 1px solid hsl(from var(--_bg-color) h s calc(l * 1.1));
+    }
+
+    & .timeline > *:nth-child(5n) {
+        border-right: 2px solid hsl(from var(--_bg-color) h s calc(l * 1.5));
     }
 }
 
@@ -123,7 +135,7 @@ body {
     flex-direction: column;
     gap: calc(var(--_track-height) * 0.1);
     padding-bottom: 1rem;
-    width: 1500px;
+    width: var(--_track-width);
 
     & .track {
         flex-shrink: 0;

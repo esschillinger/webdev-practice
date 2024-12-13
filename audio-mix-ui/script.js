@@ -26,11 +26,15 @@ document.querySelectorAll('.audio-wrapper').forEach((elem) => {
         height: height,
         waveColor: `hsl(from ${color} h s calc(l * 1.25) )`,
         progressColor : color, // var(--_color)
-        cursorColor: "transparent",
+        cursorWidth: 0,
         url : "test_audio.ogg",
     });
 
     wavesurfers.push(wavesurfer);
+
+    wavesurfer.on("ready", () => {
+        console.log(wavesurfer.getDuration());
+    });
 
     // wavesurfer.on("interaction", () => {
     //     wavesurfer.play();
