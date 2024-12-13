@@ -1,0 +1,74 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Mixer</title>
+    <link rel="stylesheet" href="/colors.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!--
+        TODO:
+            1. scroll or CTRL + scroll while .track-grid hover zooms in/out
+                1.a. also decreases the time interval for snap-to-grid
+            2. snap-to-grid to move audio tracks
+            3. create waveforms from audio
+                3.a. different colors for each set of grouped audio files
+            4. replace segmented .track-grid with a timeline along the top (less clutter)
+            5. manipulate audio with right click
+                5.a. probably need to use preventDefault()
+                5.b. options
+                    5.b.1. crop
+                    5.b.2. adjust volume (maybe make the controls easier to use than a right-click menu option?)
+                    5.b.3. toggle (mute/unmute)
+                    5.b.4. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
+            6. true audio mixing
+                6.a. add effects (reverb, filters, etc)
+     -->
+    
+    <div class="mixer">
+        <div class="main-wrapper">
+            <div class="track-controls">
+                bruh
+            </div>
+    
+            
+            <div class="scroll-wrapper">
+                <div class="slider"></div>
+                
+                <div class="timeline-wrapper">
+                    <div class="timeline"></div>
+                </div>
+                
+                <div class="track-list">
+                    <div class="track">
+                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-file="test_audio.ogg" data-title="My audio file"></div>
+                    </div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                    <div class="track"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="controls">
+            <button>Play</button>
+            <input type="range" class="time-controls" min="0" max="100" value="50"> <!-- use ms or 1/100s -->
+            <button>Settings</button>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -53,8 +53,8 @@ body {
 }
 
 .custom-input__collaborator.handle-validated {
-    color: rgb(var(--color-blue));
-    background-color: rgba(var(--color-blue), 0.25);
+    color: var(--color-blue);
+    background-color: rgb(from var(--color-blue) r g b / 0.25);
     cursor: pointer;
     transition: color 250ms ease,
                 background-color 250ms ease;
@@ -64,7 +64,7 @@ body {
 .custom-input__collaborator.handle-validated:focus {
     outline: none;
     color: white;
-    background-color: rgba(var(--color-blue), 0.75);
+    background-color: rgb(from var(--color-blue) r g b / 0.75);
 }
 
 .custom-input__collaborator::selection {
@@ -105,7 +105,7 @@ body {
 
 .custom-input__user:hover {
     cursor: pointer;
-    background-color: rgba(var(--color-blue), 0.1);
+    background-color: rgb(from var(--color-blue) r g b / 0.1);
 }
 
 .custom-input__user img {
@@ -154,7 +154,7 @@ body {
 }
 
 .custom-input:has(.custom-input__collaborator[data-handle]) .icon-wrapper:has(.custom-input__send) {
-    background-color: rgb(var(--color-viridian));
+    background-color: var(--color-viridian);
     cursor: pointer;
 }
 

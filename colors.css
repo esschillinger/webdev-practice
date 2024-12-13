@@ -1,19 +1,18 @@
 :root {
-    --color-purple: 151, 71, 255;
-    --color-red: 208, 37, 37;
-    --color-green: 50, 168, 82;
-    --color-blue: 33, 150, 243;
-    --color-orange: 222, 147, 9;
-    --color-champagne: 255, 234, 208;
-    --color-mauve: 202, 168, 245;
-    --color-tropicalindigo: 153, 132, 212;
-    --color-raisinblack: 47, 36, 44;
-    --color-viridian: 78, 147, 122;
-    --color-oldlace: 255, 245, 232;
-    --color-thistle: 228, 212, 250;
-    --color-periwinkle: 204, 193, 233;
-    --color-mountbattenpink: 162, 134, 154;
-    --color-tiffanyblue: 161, 206, 190;
-    --color-floralwhite: 255, 248, 240;
+    --color-purple: rgb(151, 71, 255);
+    --color-red: rgb(208, 37, 37);
+    --color-green: rgb(50, 168, 82);
+    --color-blue: rgb(33, 150, 243);
+    --color-orange: rgb(222, 147, 9);
+    --color-champagne: rgb(255, 234, 208);
+    --color-mauve: rgb(202, 168, 245);
+    --color-tropicalindigo: rgb(153, 132, 212);
+    --color-raisinblack: rgb(47, 36, 44);
+    --color-viridian: rgb(78, 147, 122);
+    --color-oldlace: rgb(255, 245, 232);
+    --color-thistle: rgb(228, 212, 250);
+    --color-periwinkle: rgb(204, 193, 233);
+    --color-mountbattenpink: rgb(162, 134, 154);
+    --color-tiffanyblue: rgb(161, 206, 190);
+    --color-floralwhite: rgb(255, 248, 240);
 }
-

@@ -1,0 +1,62 @@
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+}
+
+.tooltip {
+    position: relative;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 3rem;
+}
+
+.tooltip__text {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: rgb(from var(--color-blue) r g b / 0.5);
+    text-underline-offset: 1rem;
+    max-width: 40ch;
+}
+
+.tooltip__info {
+    position: absolute;
+    top: -2rem;
+    /* transform: translateY(-100%); */
+    left: 50%;
+    transform: translate(-50%, -100%);
+    font-size: 2rem;
+    width: 100%;
+    padding-inline: 1rem;
+    border-radius: 1rem;
+    text-wrap: pretty;
+    text-align: center;
+    color: white;
+    background-color: black;
+}
+
+.tooltip__info::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    /* display: inline-block; */
+    transform: translate(-50%, 50%) rotate(45deg);
+    width: 2rem;
+    height: 2rem;
+    background-color: black;
+}
+
+.tooltip:not(:hover) .tooltip__info {
+    display: none;
+}

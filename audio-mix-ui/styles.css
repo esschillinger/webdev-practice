@@ -1,0 +1,174 @@
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    width: 100dvw;
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+    font-family: 'Open Sans', sans-serif;
+}
+
+.mixer {
+    --_bg-color: hsl(0, 0%, 50%);
+    --_accent-color: #ffd2a7;
+    /* --_track-count: 5; */
+    isolation: isolate;
+    position: relative;
+    width: 80dvw;
+    height: 40dvw;
+    /* aspect-ratio: 2 / 1; */
+    display: flex;
+    flex-direction: column;
+    background: var(--_bg-color);
+    border-radius: 1rem;
+}
+
+.mixer > .main-wrapper {
+    display: flex;
+    overflow: hidden;
+    
+    & .track-controls {
+        /* width: fit-content; */
+        width: 20%;
+        /* flex-basis: 20%; */
+        overflow: auto;
+        resize: horizontal;
+    }
+    
+    & .scroll-wrapper {
+        /* flex-basis: 80%; */
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: scroll;
+        overscroll-behavior: contain;
+    }
+}
+
+.mixer .slider {
+    --_slider-width: 2px;
+    --_handle-width: 20px;
+    --_handle-height: calc(var(--_handle-width) / 2);
+    --_handle-color: var(--color-blue);
+
+    z-index: 3;
+    position: absolute;
+    top: 0;
+    /* can use percentages/relative values when .slider is a child of .track-list  */
+    /* must use absolute values when .slider is a direct child of scroll-wrapper  */
+    left: 1400px;
+    width: var(--_slider-width);
+    height: 100%;
+    background: var(--_handle-color);
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        width: var(--_handle-width);
+        height: var(--_handle-height);
+        transform: translateX(calc(-50% + (var(--_slider-width) / 2)));
+        background: var(--_handle-color);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        width: calc(var(--_handle-width) / sqrt(2));
+        height: calc(var(--_handle-width) / sqrt(2));
+        transform:
+            translate(
+                calc(-50% + (var(--_slider-width) / 2)),
+                calc(var(--_handle-height) - (var(--_handle-height) / sqrt(2)))
+            )
+            rotate(45deg);
+        background: var(--_handle-color);
+    }
+}
+
+.mixer .timeline-wrapper {
+    z-index: 2;
+    position: sticky;
+    top: 0;
+    background: var(--_bg-color);
+    border-bottom: 5px solid yellow;
+    width: 1500px;
+    /* border-bottom: 5px solid var(--_accent-color); */
+
+    & .timeline {
+        display: grid;
+        grid-template-rows: 20px;
+        grid-template-columns: repeat(30, 50px);
+    }
+}
+
+.mixer .track-list {
+    --_track-count: 15;
+    --_track-height: 6rem;
+    position: relative; /* make the track list the containing block for the slider  */
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--_track-height) * 0.1);
+    padding-bottom: 1rem;
+    width: 1500px;
+
+    & .track {
+        flex-shrink: 0;
+        height: var(--_track-height);
+        background: hsl(from var(--_bg-color) h s calc(l * 0.8));
+    }
+}
+
+.mixer .track .audio-wrapper {
+    --_color: var(--color-purple);
+    --_color-lighter: hsl(from var(--_color) h s calc(l * 1.25));
+    --_color-darker: hsl(from var(--_color) h s calc(l * 0.5));
+
+    position: relative;
+    width: 200px;
+    height: 100%;
+    color: var(--_color-lighter);
+    background-color: var(--_color-darker);
+    border-radius: 1ch;
+
+    &::before {
+        content: attr(data-title);
+        position: absolute;
+        inset: 0;
+        width: fit-content;
+        height: fit-content;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding-inline: 1ch;
+        color: var(--_color-darker);
+        background: var(--_color-lighter);
+    }
+
+    &::part(cursor) {
+        display: none;
+    }
+}
+
+.mixer > .controls {
+    flex-basis: 15%;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+
+    & .time-controls {
+        flex-grow: 1;
+        accent-color: var(--_accent-color);
+    }
+}
