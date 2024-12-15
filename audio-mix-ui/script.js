@@ -8,7 +8,9 @@ const timeline = document.querySelector('.mixer .timeline');
 const track_list = document.querySelector('.mixer .track-list');
 const play_button = document.querySelector('button.play-button');
 
-let wavesurfers = new Map();
+let wavesurfer_map = new Map();
+let total_wavesurfers = document.querySelectorAll('.mixer .audio-wrapper').length;
+let ready_wavesurfers = 0;
 let track_duration;
 
 let draggable_audio;
@@ -30,16 +32,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     track_duration = parseInt(get_custom_property("--_duration", mixer.style.cssText));
 
-    for (let i = 0; i < track_duration; i++) {
+    for (let x = 0; x < track_duration; x++) {
         let grid_space = document.createElement("div");
         grid_space.classList.add("grid-space");
+
+        if (x % 5 == 4) {
+            // match with :nth-child(xn) selector in CSS (.grid-spaces with double height and lighter border)
+            grid_space.dataset.value = `${x+1}s`;
+        }
 
         timeline.appendChild(grid_space);
     }
 });
 
 
-document.querySelectorAll('.audio-wrapper').forEach((elem) => {
+document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
     // const css = elem.style.cssText;
     // const color_property = css.split(";").find(style => style.includes("--_color"));
     // const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
@@ -49,37 +56,44 @@ document.querySelectorAll('.audio-wrapper').forEach((elem) => {
 
     let wavesurfer = WaveSurfer.create({
         container : elem,
-        height: height,
-        waveColor: `hsl(from ${color} h s calc(l * 1.25) )`,
+        height : height,
+        waveColor : `hsl(from ${color} h s calc(l * 1.25) )`,
         progressColor : color, // var(--_color)
-        cursorWidth: 0,
+        cursorWidth : 0,
         url : "test_audio.ogg",
     });
 
-    wavesurfers.set(elem.dataset.id, wavesurfer);
+    wavesurfer_map.set(elem.dataset.id, wavesurfer);
 
     wavesurfer.on("ready", () => {
         const track_width = track_list.getBoundingClientRect().width;
-        // console.log(track_width);
         const ratio = wavesurfer.getDuration() / track_duration;
-
+        
         elem.style.width = ratio * track_width;
+
+        ready_wavesurfers++;
+        if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
     });
 
-    // wavesurfer.on("interaction", () => {
-    //     wavesurfer.play();
-    // });
+    wavesurfer.on("click", () => {
+        // prevent default behavior of seeking
+        wavesurfer.setTime(0);
+    });
+
+    wavesurfer.on("dblclick", () => {
+        wavesurfer.play();
+    });
 });
 
 
 scroll_container.addEventListener("mousedown", function(e) {
     e.preventDefault();
+    demo_playing = false;
     const container_rect = this.getBoundingClientRect();
     const left_margin = container_rect.left;
 
     const cursor_left = this.scrollLeft + e.clientX - left_margin;
     
-    // 
     if (e.target.offsetParent && e.target.offsetParent.classList.contains("audio-wrapper")) {
         draggable_audio = e.target.offsetParent;
         initial_audio_left = e.clientX - draggable_audio.getBoundingClientRect().left;
@@ -120,23 +134,75 @@ scroll_container.addEventListener("mousemove", function(e) {
         }
         
         draggable_audio.style.left = new_audio_left;
-        // console.log(cursor_left, audio_left, cursor_left - audio_left);
     }
 });
 
 
 play_button.addEventListener("click", () => {
     demo_playing = true;
-
-    slider.style.left = 0;
+    
+    const track_width = parseInt(track_list.getBoundingClientRect().width);
+    let slider_position = slider.style.left === "" ? 0 : parseInt(slider.style.left);
+    slider.style.left = `${slider_position}px`;
+    let audio_delays = [];
 
     document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
-        const left = elem.style.left === "" ? 0 : parseInt(elem.style.left);
-        const ratio = left / parseInt(track_list.getBoundingClientRect().width);
-        const delay = ratio * track_duration * 1000; // convert s to ms
+        const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
+        const audio_end = audio_start + parseInt(elem.style.width);
+        const wavesurfer = wavesurfer_map.get(elem.dataset.id);
 
-        setTimeout(() => {
-            wavesurfers.get(elem.dataset.id).play();
-        }, delay);
+        if (slider_position < audio_end) {
+            let delay;
+            // audio needs to be played
+            if (slider_position > audio_start) {
+                // slider is in the middle of current audio file, set playback position
+                const audio_ratio = (slider_position - audio_start) / (audio_end - audio_start);
+                wavesurfer.setTime(wavesurfer.getDuration() * audio_ratio);
+                
+                delay = 0;
+            } else {
+                // audio occurs later and needs a delay
+                wavesurfer.setTime(0);
+                
+                const ratio = (audio_start - slider_position) / track_width;
+                delay = ratio * track_duration * 1000; // convert s to ms
+            }
+
+            audio_delays.push([wavesurfer, delay]);
+        }
     });
+
+    // play audio outside of the config/preprocess forEach because setTime() takes a nonnegligible length of time to complete, even for small audio file sets
+    // goal: reduce synchronization issues between audio progress relative to other files
+    audio_delays.forEach((elem) => {
+        setTimeout(() => {
+            elem[0].play();
+        }, elem[1]);
+    });
+
+    const polling_rate = 50; // in ms
+    const pixels_per_polling_rate = track_width / track_duration * polling_rate / 1000;
+    const remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
+
+    (function while_delay(duration, polling_rate) {
+        setTimeout(() => {
+            slider_position += pixels_per_polling_rate;
+            slider.style.left = `${slider_position}px`;
+            console.log(slider.style.left, duration, polling_rate);
+
+            if (!demo_playing) {
+                // pause all tracks if play is stopped from user interaction
+                audio_delays.forEach((elem) => {
+                    elem[0].pause();
+                });
+            } else if ((duration -= polling_rate) > 0) {
+                // continue playing if there's audio left in the demo
+                while_delay(duration, polling_rate);
+            } else {
+                // demo reached "EOF"
+                demo_playing = false;
+                slider.style.left = `${track_width}px`;
+            }
+        }, polling_rate);
+    })(remaining_duration, polling_rate); // duration, polling_rate in ms
 });
