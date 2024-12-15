@@ -57,7 +57,7 @@ document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
     let wavesurfer = WaveSurfer.create({
         container : elem,
         height : height,
-        waveColor : `hsl(from ${color} h s calc(l * 1.25) )`,
+        waveColor : `hsl(from ${color} h s calc(l * 1.25))`,
         progressColor : color, // var(--_color)
         cursorWidth : 0,
         url : "test_audio.ogg",
@@ -138,6 +138,44 @@ scroll_container.addEventListener("mousemove", function(e) {
 });
 
 
+const zoom_increment = 10;
+const tl_grid_min = 50;
+const tl_grid_max = 100;
+let supports_wheel = false;
+
+function track_zoom(e) {
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+
+    if (e.type == "wheel") supports_wheel = true;
+    else if (supports_wheel) return;
+
+    let delta = ((e.deltaY || -e.wheelDelta || e.detail) >> 10) || 1;
+    let tl_grid_width = parseInt(get_custom_property('--_timeline-width', mixer.styles.cssText));
+
+    if (delta > 0) {
+        console.log('zoom out');
+        if ((tl_grid_width -= zoom_increment) < tl_grid_min) {
+            tl_grid_width = tl_grid_max;
+        } else {
+
+        }
+    } else {
+        console.log('zoom in');
+        if ((tl_grid_width += zoom_increment) > tl_grid_max) {
+            tl_grid_width = tl_grid_min;
+        } else {
+
+        }
+    }
+}
+
+
+scroll_container.addEventListener("wheel", track_zoom);
+scroll_container.addEventListener("mousewheel", track_zoom);
+scroll_container.addEventListener("DOMMouseScroll", track_zoom);
+
+
 play_button.addEventListener("click", () => {
     demo_playing = true;
     
@@ -180,29 +218,39 @@ play_button.addEventListener("click", () => {
         }, elem[1]);
     });
 
-    const polling_rate = 50; // in ms
-    const pixels_per_polling_rate = track_width / track_duration * polling_rate / 1000;
-    const remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
+    // duration, interval in ms
+    const interval = 50;
+    const pixels_per_interval = track_width / track_duration * interval / 1000;
+    let remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
 
-    (function while_delay(duration, polling_rate) {
-        setTimeout(() => {
-            slider_position += pixels_per_polling_rate;
-            slider.style.left = `${slider_position}px`;
-            console.log(slider.style.left, duration, polling_rate);
+    let expected = Date.now() + interval;
 
-            if (!demo_playing) {
-                // pause all tracks if play is stopped from user interaction
-                audio_delays.forEach((elem) => {
-                    elem[0].pause();
-                });
-            } else if ((duration -= polling_rate) > 0) {
-                // continue playing if there's audio left in the demo
-                while_delay(duration, polling_rate);
-            } else {
-                // demo reached "EOF"
-                demo_playing = false;
-                slider.style.left = `${track_width}px`;
-            }
-        }, polling_rate);
-    })(remaining_duration, polling_rate); // duration, polling_rate in ms
+    // self-adjusting timer
+    setTimeout(while_delay, interval);
+    function while_delay() {
+        let time_delta = Date.now() - expected;
+        if (time_delta > interval) expected += time_delta;
+        
+        slider_position += pixels_per_interval;
+        slider.style.left = `${slider_position}px`;
+
+        if (!demo_playing) {
+            // user interrups playback, stop all tracks
+            audio_delays.forEach((elem) => {
+                elem[0].pause();
+            });
+
+            return;
+        } else if ((remaining_duration -= interval) > 0) {
+            // track hasn't finished, continue playing
+            expected += interval;
+            setTimeout(while_delay, Math.max(0, interval - time_delta));
+        } else {
+            // demo reached "EOF"
+            demo_playing = false;
+            slider.style.left = `${track_width}px`;
+
+            return;
+        }
+    }
 });
