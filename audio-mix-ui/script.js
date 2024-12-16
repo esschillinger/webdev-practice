@@ -2,14 +2,14 @@ import WaveSurfer from './wavesurfer.esm.js'
 
 
 const mixer = document.querySelector('.mixer');
-const scroll_container = document.querySelector('.mixer .scroll-wrapper');
-const slider = document.querySelector('.mixer .slider');
-const timeline = document.querySelector('.mixer .timeline');
-const track_list = document.querySelector('.mixer .track-list');
-const play_button = document.querySelector('button.play-button');
+const scroll_container = mixer.querySelector('.scroll-wrapper');
+const slider = mixer.querySelector('.slider');
+const timeline = mixer.querySelector('.timeline');
+const track_list = mixer.querySelector('.track-list');
+const play_button = mixer.querySelector('button.play-button');
 
 let wavesurfer_map = new Map();
-let total_wavesurfers = document.querySelectorAll('.mixer .audio-wrapper').length;
+let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
 let track_duration;
 
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
+mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
     // const css = elem.style.cssText;
     // const color_property = css.split(";").find(style => style.includes("--_color"));
     // const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
@@ -68,8 +68,8 @@ document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
     wavesurfer.on("ready", () => {
         const track_width = track_list.getBoundingClientRect().width;
         const ratio = wavesurfer.getDuration() / track_duration;
-        
-        elem.style.width = ratio * track_width;
+
+        elem.style.width = `${ratio * track_width}px`;
 
         ready_wavesurfers++;
         if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
@@ -123,7 +123,7 @@ scroll_container.addEventListener("mousemove", function(e) {
 
         const cursor_left = scroll_container.scrollLeft + e.clientX - left_margin; // cursor left, relative to scroll container
         if (!draggable_audio.style.left) {
-            draggable_audio.style.left = audio_rect.left;
+            draggable_audio.style.left = `${audio_rect.left}px`;
         }
 
         const track_width = track_list.getBoundingClientRect().width;
@@ -133,7 +133,7 @@ scroll_container.addEventListener("mousemove", function(e) {
             new_audio_left = track_width - audio_rect.width;
         }
         
-        draggable_audio.style.left = new_audio_left;
+        draggable_audio.style.left = `${new_audio_left}px`;
     }
 });
 
@@ -151,25 +151,66 @@ function track_zoom(e) {
     else if (supports_wheel) return;
 
     let delta = ((e.deltaY || -e.wheelDelta || e.detail) >> 10) || 1;
-    let tl_grid_width = parseInt(get_custom_property('--_timeline-width', mixer.styles.cssText));
+    let tl_grid_width = parseInt(get_custom_property('--_timeline-width', mixer.style.cssText));
+    let multiplier = null;
 
     if (delta > 0) {
-        console.log('zoom out');
         if ((tl_grid_width -= zoom_increment) < tl_grid_min) {
+            // zoom out
+            multiplier = 0.5;
             tl_grid_width = tl_grid_max;
-        } else {
-
         }
-    } else {
-        console.log('zoom in');
-        if ((tl_grid_width += zoom_increment) > tl_grid_max) {
-            tl_grid_width = tl_grid_min;
-        } else {
+    } else if ((tl_grid_width += zoom_increment) > tl_grid_max) {
+        // zoom in
+        multiplier = 2;
+        tl_grid_width = tl_grid_min;
+    }
 
+    if (multiplier) {
+        const grid_space_count = multiplier * timeline.querySelectorAll(".grid-space").length;
+        const timeline_space_duration = (1 / multiplier) * parseFloat(get_custom_property('--_timeline-space-duration', mixer.style.cssText));
+        let timeline_innerhtml = '';
+    
+        for (let x = 0; x < grid_space_count; x++) {
+            const grid_space = document.createElement("div");
+            grid_space.classList.add("grid-space");
+    
+            if (x % 5 == 4) grid_space.dataset.value = `${(x+1) * (track_duration / grid_space_count)}s`;
+            timeline_innerhtml += grid_space.outerHTML;
         }
+    
+        timeline.innerHTML = timeline_innerhtml;
+        mixer.style.setProperty('--_timeline-space-duration', `${timeline_space_duration}`);
+    }
+
+    // need ratio of new track width to old track width to position audio properly with left
+    let initial_track_width = track_list.getBoundingClientRect().width;
+    
+    mixer.style.setProperty('--_timeline-width', `${tl_grid_width}px`);
+
+    // if the number of .grid-spaces is being changed, initial_track_width will be 2x what it should be (unchanged) for a split second
+    if (multiplier) {
+        // so in that case, update it to be the correct value
+        initial_track_width = track_list.getBoundingClientRect().width;
+    }
+
+    mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
+        const new_track_width = track_list.getBoundingClientRect().width;
+        const ratio = wavesurfer_map.get(elem.dataset.id).getDuration() / track_duration;
+        
+        elem.style.width = `${ratio * new_track_width}px`;
+        let offset = elem.style.left === "" ? 0 : parseFloat(elem.style.left);
+        
+        if (offset != 0) {
+            elem.style.left = `${offset * (new_track_width / initial_track_width)}px`;
+        }
+    });
+
+    // force slider to stay in the track if zoom out makes its left larger than track width
+    if (parseInt(slider.style.left) > track_list.getBoundingClientRect().width) {
+        slider.style.left = `${track_list.getBoundingClientRect().width}px`;
     }
 }
-
 
 scroll_container.addEventListener("wheel", track_zoom);
 scroll_container.addEventListener("mousewheel", track_zoom);
@@ -179,12 +220,12 @@ scroll_container.addEventListener("DOMMouseScroll", track_zoom);
 play_button.addEventListener("click", () => {
     demo_playing = true;
     
-    const track_width = parseInt(track_list.getBoundingClientRect().width);
+    let track_width = parseInt(track_list.getBoundingClientRect().width);
     let slider_position = slider.style.left === "" ? 0 : parseInt(slider.style.left);
     slider.style.left = `${slider_position}px`;
     let audio_delays = [];
 
-    document.querySelectorAll('.mixer .audio-wrapper').forEach((elem) => {
+    mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
         const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
         const audio_end = audio_start + parseInt(elem.style.width);
         const wavesurfer = wavesurfer_map.get(elem.dataset.id);
@@ -220,7 +261,6 @@ play_button.addEventListener("click", () => {
 
     // duration, interval in ms
     const interval = 50;
-    const pixels_per_interval = track_width / track_duration * interval / 1000;
     let remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
 
     let expected = Date.now() + interval;
@@ -228,11 +268,18 @@ play_button.addEventListener("click", () => {
     // self-adjusting timer
     setTimeout(while_delay, interval);
     function while_delay() {
+        let track_width = track_list.getBoundingClientRect().width; // continuously update to handle user zooming while audio playing
+        let pixels_per_interval = track_width / track_duration * interval / 1000;
         let time_delta = Date.now() - expected;
         if (time_delta > interval) expected += time_delta;
         
         slider_position += pixels_per_interval;
         slider.style.left = `${slider_position}px`;
+
+        // scroll with the slider as it's about to leave the view
+        if (slider_position > (scroll_container.scrollLeft + (0.9 * scroll_container.getBoundingClientRect().width))) {
+            scroll_container.scrollLeft = slider_position - (0.1 * scroll_container.getBoundingClientRect().width);
+        }
 
         if (!demo_playing) {
             // user interrups playback, stop all tracks

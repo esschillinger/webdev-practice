@@ -22,7 +22,8 @@ body {
     /* duration in seconds (for now) */
     --_duration: 40;
     --_timeline-width: 100px;
-    --_track-width: calc(var(--_duration) * var(--_timeline-width));
+    --_timeline-space-duration: 1;
+    --_track-width: calc(var(--_duration) * var(--_timeline-width) / var(--_timeline-space-duration));
     --_bg-color: hsl(0, 0%, 50%);
     --_accent-color: #ffd2a7;
     /* --_track-count: 5; */
@@ -37,8 +38,9 @@ body {
     display: flex;
     flex-direction: column;
     background: var(--_bg-color);
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     overflow: hidden;
+    box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.5);
 }
 
 .mixer[data-state="loading"] {
@@ -143,6 +145,7 @@ body {
         display: grid;
         grid-template-rows: calc(var(--_timeline-std-height) * 2 + 1rem);
         grid-template-columns: repeat(var(--_duration), var(--_timeline-width));
+        grid-auto-flow: column;
     }
 
     & .timeline > *:not(:nth-child(5n)) {
