@@ -69,17 +69,16 @@ body {
 .mixer > .main-wrapper {
     display: flex;
     overflow: hidden;
+    padding: 1rem;
     
     & .track-controls {
         /* width: fit-content; */
         width: 20%;
-        /* flex-basis: 20%; */
         overflow: auto;
         /* resize: horizontal; */
     }
     
     & .scroll-wrapper {
-        /* flex-basis: 80%; */
         position: relative;
         width: 100%;
         height: 100%;
@@ -173,7 +172,7 @@ body {
 
 .mixer .track-list {
     --_track-count: 15;
-    --_track-height: 6rem;
+    --_track-height: 4rem;
     position: relative; /* make the track list the containing block for the slider  */
     display: flex;
     flex-direction: column;
@@ -194,6 +193,7 @@ body {
     --_color-darker: hsl(from var(--_color) h s calc(l * 0.5));
 
     position: relative;
+    /* isolation: isolate; */
     /* width: 0px; */
     height: 100%;
     color: var(--_color-lighter);
@@ -205,6 +205,7 @@ body {
         position: absolute;
         inset: 0;
         height: fit-content;
+        font-size: 0.8rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -216,10 +217,22 @@ body {
     &::part(cursor) {
         display: none;
     }
+
+    &[data-muted="true"]::after {
+        content: '';
+        /* z-index: 2; */
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: saturate(70%);
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
+    }
 }
 
 .mixer > .controls {
-    flex-basis: 15%;
     display: flex;
     align-items: center;
     padding: 1rem;
@@ -229,4 +242,54 @@ body {
         flex-grow: 1;
         accent-color: var(--_accent-color);
     }
+}
+
+#audio-controls {
+    --_bg-color: white;
+    --_accent-color: var(--color-purple);
+    /* use inline style to set --_accent-color to the audio color */
+
+    z-index: 1000;
+    position: fixed;
+    padding: 0.75ch;
+    background-color: var(--_bg-color);
+    border-color: hsl(from var(--_bg-color) h s calc(l * 0.75));
+    border-radius: 0.375ch;
+    box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 0.5);
+
+    &[data-state="hidden"] {
+        display: none;
+    }
+}
+
+#audio-controls .control {
+    display: flex;
+    gap: 0.5ch;
+    padding: 1ch;
+    border-radius: 0.25ch;
+
+    &:not(:has(input[type="range"], button:disabled)):hover {
+        background-color: hsl(from var(--_bg-color) h s calc(l * 0.925));
+    }
+
+    &:not(:last-child) {
+        border-bottom: 1px solid hsl(from var(--_bg-color) h s calc(l * 0.75));
+    }
+}
+
+#audio-controls button {
+    font-family: inherit;
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+#audio-controls input[type="range"] {
+    accent-color: var(--_accent-color);
 }

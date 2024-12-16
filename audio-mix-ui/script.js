@@ -1,12 +1,17 @@
 import WaveSurfer from './wavesurfer.esm.js'
 
 
-const mixer = document.querySelector('.mixer');
-const scroll_container = mixer.querySelector('.scroll-wrapper');
-const slider = mixer.querySelector('.slider');
-const timeline = mixer.querySelector('.timeline');
-const track_list = mixer.querySelector('.track-list');
-const play_button = mixer.querySelector('button.play-button');
+const mixer = document.querySelector(".mixer");
+const scroll_container = mixer.querySelector(".scroll-wrapper");
+const slider = mixer.querySelector(".slider");
+const timeline = mixer.querySelector(".timeline");
+const track_list = mixer.querySelector(".track-list");
+const play_button = mixer.querySelector("button.play-button");
+
+const audio_controls = document.querySelector("#audio-controls");
+const mute_button = audio_controls.querySelector("#mute");
+const unmute_button = audio_controls.querySelector("#unmute");
+const crop_button = audio_controls.querySelector("#crop");
 
 let wavesurfer_map = new Map();
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
@@ -38,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (x % 5 == 4) {
             // match with :nth-child(xn) selector in CSS (.grid-spaces with double height and lighter border)
-            grid_space.dataset.value = `${x+1}s`;
+            grid_space.dataset.value = `${x + 1}s`;
         }
 
         timeline.appendChild(grid_space);
@@ -91,7 +96,6 @@ scroll_container.addEventListener("mousedown", function(e) {
     demo_playing = false;
     const container_rect = this.getBoundingClientRect();
     const left_margin = container_rect.left;
-
     const cursor_left = this.scrollLeft + e.clientX - left_margin;
     
     if (e.target.offsetParent && e.target.offsetParent.classList.contains("audio-wrapper")) {
@@ -100,6 +104,7 @@ scroll_container.addEventListener("mousedown", function(e) {
         draggable_audio.draggable = true;
     } else {
         slider.style.left = `${cursor_left}px`;
+        audio_controls.dataset.state = "hidden";
     }
 });
 
@@ -180,7 +185,7 @@ function track_zoom(e) {
             const grid_space = document.createElement("div");
             grid_space.classList.add("grid-space");
     
-            if (x % 5 == 4) grid_space.dataset.value = `${(x+1) * (track_duration / grid_space_count)}s`;
+            if (x % 5 == 4) grid_space.dataset.value = `${(x + 1) * (track_duration / grid_space_count)}s`;
             timeline_innerhtml += grid_space.outerHTML;
         }
     
@@ -222,6 +227,53 @@ scroll_container.addEventListener("mousewheel", track_zoom);
 scroll_container.addEventListener("DOMMouseScroll", track_zoom);
 
 
+scroll_container.addEventListener("contextmenu", (e) => {
+    e.preventDefault(); // prevent standard context menu from appearing
+
+    const audio_wrapper = e.target.offsetParent;
+    if (audio_wrapper && audio_wrapper.classList.contains("audio-wrapper")) {
+        // match volume slider accent color to audio color
+        audio_controls.style.setProperty("--_accent-color", get_custom_property("--_color", audio_wrapper.style.cssText));
+
+        // map current audio to #audio-controls
+        audio_controls.dataset.audioid = audio_wrapper.dataset.id;
+
+        // get #audio-controls menu width and height
+        const audio_controls_size = audio_controls.getBoundingClientRect();
+        const width = audio_controls_size.width;
+        const height = audio_controls_size.height;
+
+        // TODO try to place #audio-controls to the bottom and right of the cursor, adjust based on size
+
+        // for now, just stick it to the bottom and right (it's late, i'm tired)
+        audio_controls.style.left = `${e.clientX + 20}px`;
+        audio_controls.style.top = `${e.clientY + 20}px`;
+
+        // show controls
+        audio_controls.dataset.state = "";
+    }
+});
+
+
+function mute_audio(muted) {
+    mixer.querySelector(`.audio-wrapper[data-id="${audio_controls.dataset.audioid}"]`).dataset.muted = `${muted}`;
+    mute_button.disabled = muted;
+    unmute_button.disabled = !muted;
+
+    audio_controls.dataset.state = "hidden";
+}
+
+
+mute_button.addEventListener("mousedown", () => mute_audio(true));
+unmute_button.addEventListener("mousedown", () => mute_audio(false));
+
+
+crop_button.addEventListener("click", () => {
+    
+    audio_controls.dataset.state = "hidden";
+});
+
+
 play_button.addEventListener("click", () => {
     demo_playing = true;
     
@@ -230,7 +282,7 @@ play_button.addEventListener("click", () => {
     slider.style.left = `${slider_position}px`;
     let audio_delays = [];
 
-    mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
+    mixer.querySelectorAll('.audio-wrapper:not([data-muted="true"])').forEach((elem) => {
         const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
         const audio_end = audio_start + parseInt(elem.style.width);
         const wavesurfer = wavesurfer_map.get(elem.dataset.id);

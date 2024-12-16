@@ -10,27 +10,32 @@
 <body>
     <!--
         TODO:
-            1. scroll or CTRL + scroll while .track-grid hover zooms in/out
-                1.a. also decreases the time interval for snap-to-grid
-            2. snap-to-grid to move audio tracks
-            3. replace segmented .track-grid with a timeline along the top (less clutter)
-            4. manipulate audio with right click
-                4.a. probably need to use preventDefault()
-                4.b. options
-                    4.b.1. crop
-                    4.b.2. adjust volume (maybe make the controls easier to use than a right-click menu option?)
-                    4.b.3. toggle (mute/unmute)
-                    4.b.4. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
-            5. true audio mixing
-                5.a. add effects (reverb, filters, etc)
-            6. map .slider to input[type="range"] (bidirectionally)
+            1. snap-to-grid to move audio tracks
+            2. manipulate audio with right click
+                2.a. hide on any action outside of scroll_container (scroll_container -> blur)
+                2.b. options
+                    2.b.1. crop
+                    2.b.2. adjust volume (maybe make the controls easier to use than a right-click menu option?)
+                    2.b.3. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
+            3. true audio mixing
+                3.a. add effects (reverb, filters, etc)
+            4. map .slider to input[type="range"] (bidirectionally)
      -->
     
-    <div class="mixer" style="--_duration: 10; --_timeline-width: 50px; --_timeline-space-duration: 1;" data-state="loading">
+    <div id="audio-controls" data-state="hidden">
+        <div class="control"><button id="mute">Mute</button></div>
+        <div class="control"><button id="unmute" disabled>Unmute</button></div>
+        <div class="control"><button id="crop">Crop</button></div>
+        <div class="control">
+            <input type="range" min="0" max="1" step="0.01" value="1">
+        </div>
+    </div>
+    
+    <div class="mixer" style="--_duration: 20; --_timeline-width: 50px; --_timeline-space-duration: 1;" data-state="loading">
         <div class="main-wrapper">
-            <div class="track-controls">
+            <!-- <div class="track-controls">
                 
-            </div>
+            </div> -->
     
             
             <div class="scroll-wrapper">
