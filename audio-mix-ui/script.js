@@ -149,25 +149,30 @@ function track_zoom(e) {
 
     if (e.type == "wheel") supports_wheel = true;
     else if (supports_wheel) return;
-
+    let grid_space_count = timeline.querySelectorAll(".grid-space").length;
     let delta = ((e.deltaY || -e.wheelDelta || e.detail) >> 10) || 1;
     let tl_grid_width = parseInt(get_custom_property('--_timeline-width', mixer.style.cssText));
     let multiplier = null;
 
     if (delta > 0) {
-        if ((tl_grid_width -= zoom_increment) < tl_grid_min) {
-            // zoom out
+        if (5 <= grid_space_count && grid_space_count < 10 && tl_grid_width == tl_grid_min) return; // zoom out limit
+        else if ((tl_grid_width -= zoom_increment) < tl_grid_min) {
+            // halve the number of .grid-spaces
             multiplier = 0.5;
             tl_grid_width = tl_grid_max;
         }
     } else if ((tl_grid_width += zoom_increment) > tl_grid_max) {
-        // zoom in
-        multiplier = 2;
-        tl_grid_width = tl_grid_min;
+        if ((grid_space_count / track_duration) >= 8) return; // zoom in limit (10+ .grid-spaces per second)
+        else {
+            // double the number of .grid-spaces
+            multiplier = 2;
+            tl_grid_width = tl_grid_min;
+        }
     }
 
     if (multiplier) {
-        const grid_space_count = multiplier * timeline.querySelectorAll(".grid-space").length;
+        grid_space_count *= multiplier;
+
         const timeline_space_duration = (1 / multiplier) * parseFloat(get_custom_property('--_timeline-space-duration', mixer.style.cssText));
         let timeline_innerhtml = '';
     
