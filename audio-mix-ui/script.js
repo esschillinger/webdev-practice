@@ -12,8 +12,9 @@ const audio_controls = document.querySelector("#audio-controls");
 const mute_button = audio_controls.querySelector("#mute");
 const unmute_button = audio_controls.querySelector("#unmute");
 const crop_button = audio_controls.querySelector("#crop");
+const volume = audio_controls.querySelector("#volume");
 
-let wavesurfer_map = new Map();
+let audio_map = new Map(); // audio_id : { wavesurfer, delay, volume, muted }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
 let track_duration;
@@ -68,7 +69,13 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
         url : "test_audio.ogg",
     });
 
-    wavesurfer_map.set(elem.dataset.id, wavesurfer);
+    let wavesurfer_map = new Map();
+    wavesurfer_map.set("wavesurfer", wavesurfer);
+    wavesurfer_map.set("delay", 0);
+    wavesurfer_map.set("volume", 1);
+    wavesurfer_map.set("muted", false);
+
+    audio_map.set(elem.dataset.id, wavesurfer_map);
 
     wavesurfer.on("ready", () => {
         const track_width = track_list.getBoundingClientRect().width;
@@ -206,7 +213,7 @@ function track_zoom(e) {
 
     mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
         const new_track_width = track_list.getBoundingClientRect().width;
-        const ratio = wavesurfer_map.get(elem.dataset.id).getDuration() / track_duration;
+        const ratio = audio_map.get(elem.dataset.id).get("wavesurfer").getDuration() / track_duration;
         
         elem.style.width = `${ratio * new_track_width}px`;
         let offset = elem.style.left === "" ? 0 : parseFloat(elem.style.left);
@@ -232,11 +239,19 @@ scroll_container.addEventListener("contextmenu", (e) => {
 
     const audio_wrapper = e.target.offsetParent;
     if (audio_wrapper && audio_wrapper.classList.contains("audio-wrapper")) {
+        // map current audio to #audio-controls
+        const audio_id = audio_wrapper.dataset.id;
+        audio_controls.dataset.audioid = audio_id;
+
+        // set values to match the focused audio state
+        const muted = audio_map.get(audio_id).get("muted");
+        mute_button.disabled = muted;
+        unmute_button.disabled = !muted;
+
+        volume.value = audio_map.get(audio_id).get("volume");
+
         // match volume slider accent color to audio color
         audio_controls.style.setProperty("--_accent-color", get_custom_property("--_color", audio_wrapper.style.cssText));
-
-        // map current audio to #audio-controls
-        audio_controls.dataset.audioid = audio_wrapper.dataset.id;
 
         // get #audio-controls menu width and height
         const audio_controls_size = audio_controls.getBoundingClientRect();
@@ -257,6 +272,7 @@ scroll_container.addEventListener("contextmenu", (e) => {
 
 function mute_audio(muted) {
     mixer.querySelector(`.audio-wrapper[data-id="${audio_controls.dataset.audioid}"]`).dataset.muted = `${muted}`;
+    audio_map.get(audio_controls.dataset.audioid).set("muted", muted);
     mute_button.disabled = muted;
     unmute_button.disabled = !muted;
 
@@ -274,18 +290,30 @@ crop_button.addEventListener("click", () => {
 });
 
 
+volume.addEventListener("input", () => {
+    audio_map.get(audio_controls.dataset.audioid).set("volume", volume.value);
+    audio_map.get(audio_controls.dataset.audioid).get("wavesurfer").setVolume(volume.value);
+});
+
+
+document.addEventListener("click", () => {
+    if (audio_controls !== document.activeElement && !audio_controls.contains(document.activeElement)) {
+        audio_controls.dataset.state = "hidden";
+    }
+});
+
+
 play_button.addEventListener("click", () => {
     demo_playing = true;
     
     let track_width = parseInt(track_list.getBoundingClientRect().width);
     let slider_position = slider.style.left === "" ? 0 : parseInt(slider.style.left);
     slider.style.left = `${slider_position}px`;
-    let audio_delays = [];
 
     mixer.querySelectorAll('.audio-wrapper:not([data-muted="true"])').forEach((elem) => {
         const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
         const audio_end = audio_start + parseInt(elem.style.width);
-        const wavesurfer = wavesurfer_map.get(elem.dataset.id);
+        const wavesurfer = audio_map.get(elem.dataset.id).get("wavesurfer");
 
         if (slider_position < audio_end) {
             let delay;
@@ -304,17 +332,23 @@ play_button.addEventListener("click", () => {
                 delay = ratio * track_duration * 1000; // convert s to ms
             }
 
-            audio_delays.push([wavesurfer, delay]);
+            audio_map.get(elem.dataset.id).set("delay", delay);
         }
     });
 
     // play audio outside of the config/preprocess forEach because setTime() takes a nonnegligible length of time to complete, even for small audio file sets
     // goal: reduce synchronization issues between audio progress relative to other files
-    audio_delays.forEach((elem) => {
-        setTimeout(() => {
-            elem[0].play();
-        }, elem[1]);
-    });
+    let timeouts = [];
+
+    for (const [k, v] of audio_map.entries()) {
+        if (!v.get("muted")) {
+            const t = setTimeout(() => {
+                v.get("wavesurfer").play();
+            }, v.get("delay"));
+    
+            timeouts.push(t);
+        }
+    }
 
     // duration, interval in ms
     const interval = 50;
@@ -340,8 +374,13 @@ play_button.addEventListener("click", () => {
 
         if (!demo_playing) {
             // user interrups playback, stop all tracks
-            audio_delays.forEach((elem) => {
-                elem[0].pause();
+            for (const [k, v] of audio_map.entries()) {
+                v.get("wavesurfer").pause();
+            }
+
+            // prevent any audio playback not yet triggered from firing
+            timeouts.forEach((t) => {
+                clearTimeout(t);
             });
 
             return;
