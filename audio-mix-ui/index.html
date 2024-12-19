@@ -25,6 +25,7 @@
         <div class="control"><button id="mute">Mute</button></div>
         <div class="control"><button id="unmute" disabled>Unmute</button></div>
         <div class="control"><button id="crop">Crop</button></div>
+        <div class="control"><button id="restore">Restore</button></div>
         <div class="control">
             <input type="range" id="volume" min="0.01" max="1" step="0.01" value="1">
         </div>
@@ -77,7 +78,10 @@
 
                 <div class="track-list">
                     <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-id="0" data-file="test_audio.ogg" data-title="My audio file"></div>
+                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-id="0" data-file="test_audio.ogg" data-title="My audio file">
+                            <div class="crop-tool-left"></div>
+                            <div class="crop-tool-right"></div>
+                        </div>
                     </div>
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-id="1" data-file="test_audio.ogg" data-title="My audio file"></div>

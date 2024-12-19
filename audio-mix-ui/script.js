@@ -12,9 +12,10 @@ const audio_controls = document.querySelector("#audio-controls");
 const mute_button = audio_controls.querySelector("#mute");
 const unmute_button = audio_controls.querySelector("#unmute");
 const crop_button = audio_controls.querySelector("#crop");
+const restore_button = audio_controls.querySelector("#restore");
 const volume = audio_controls.querySelector("#volume");
 
-let audio_map = new Map(); // audio_id : { wavesurfer, delay, volume, muted }
+let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
 let track_duration;
@@ -70,10 +71,12 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
     });
 
     let wavesurfer_map = new Map();
-    wavesurfer_map.set("wavesurfer", wavesurfer);
-    wavesurfer_map.set("delay", 0);
-    wavesurfer_map.set("volume", 1);
-    wavesurfer_map.set("muted", false);
+    wavesurfer_map.set("wavesurfer", wavesurfer); // wavesurfer object with waveform
+    wavesurfer_map.set("delay", 0); // plays at the start of the demo
+    wavesurfer_map.set("start", 0); // start of audio (nonzero only if cropped)
+    wavesurfer_map.set("end", -1); // end of audio (!= -1 only if cropped)
+    wavesurfer_map.set("volume", 1); // [0, 1], same as <audio> element
+    wavesurfer_map.set("muted", false); // pretty self-explanatory
 
     audio_map.set(elem.dataset.id, wavesurfer_map);
 
