@@ -20,7 +20,7 @@ A simple backdrop filter card over a colorful background that I thought looked n
 
 ### input_inner-styles
 
-A component that imitates an `<input>` element and opens up its content to the DOM. Doesn't actually use any `<input>` elements, but rather a `<div>` with `contenteditable="true"` and a non-negligible amount of JS to keep everything in line.
+A component that imitates an `<input>` element and opens up its content to the DOM. Doesn't actually use any `<input>` elements, but rather a `<div contenteditable="true">` with a non-negligible amount of JS to keep everything in line.
 
 In this example, the user can mention/tag their friends within a plaintext message to share content. The mentions are styled separately to diffentiate them from the message body.
 
