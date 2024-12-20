@@ -84,14 +84,14 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
         const track_width = track_list.getBoundingClientRect().width;
         const ratio = wavesurfer.getDuration() / track_duration;
 
-        elem.style.width = `${ratio * track_width}px`;
+        elem.style.setProperty("--_audio-width", `${ratio * track_width}px`);
 
         ready_wavesurfers++;
         if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
     });
 
     wavesurfer.on("click", () => {
-        // prevent default behavior of seeking
+        // prevent default seek behavior
         wavesurfer.setTime(0);
     });
 
@@ -218,7 +218,7 @@ function track_zoom(e) {
         const new_track_width = track_list.getBoundingClientRect().width;
         const ratio = audio_map.get(elem.dataset.id).get("wavesurfer").getDuration() / track_duration;
         
-        elem.style.width = `${ratio * new_track_width}px`;
+        elem.style.setProperty("--_audio-width", `${ratio * new_track_width}px`);
         let offset = elem.style.left === "" ? 0 : parseFloat(elem.style.left);
         
         if (offset != 0) {
@@ -288,7 +288,9 @@ unmute_button.addEventListener("mousedown", () => mute_audio(false));
 
 
 crop_button.addEventListener("click", () => {
-    
+    const crop_tool = scroll_container.querySelector(`.audio-wrapper[data-id="${audio_controls.dataset.audioid}"] .crop-tool`);
+    crop_tool.dataset.state = crop_tool.dataset.state == "active" ? "inactive" : "active";
+
     audio_controls.dataset.state = "hidden";
 });
 
@@ -313,14 +315,18 @@ play_button.addEventListener("click", () => {
     let slider_position = slider.style.left === "" ? 0 : parseInt(slider.style.left);
     slider.style.left = `${slider_position}px`;
 
+    let play_audio = new Map();
+
     mixer.querySelectorAll('.audio-wrapper:not([data-muted="true"])').forEach((elem) => {
         const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
-        const audio_end = audio_start + parseInt(elem.style.width);
+        const audio_end = audio_start + parseInt(get_custom_property("--_audio-width", elem.style.cssText));
         const wavesurfer = audio_map.get(elem.dataset.id).get("wavesurfer");
 
         if (slider_position < audio_end) {
             let delay;
             // audio needs to be played
+            play_audio.set(elem.dataset.id, true);
+
             if (slider_position > audio_start) {
                 // slider is in the middle of current audio file, set playback position
                 const audio_ratio = (slider_position - audio_start) / (audio_end - audio_start);
@@ -344,7 +350,7 @@ play_button.addEventListener("click", () => {
     let timeouts = [];
 
     for (const [k, v] of audio_map.entries()) {
-        if (!v.get("muted")) {
+        if (!v.get("muted") && play_audio.get(k)) {
             const t = setTimeout(() => {
                 v.get("wavesurfer").play();
             }, v.get("delay"));

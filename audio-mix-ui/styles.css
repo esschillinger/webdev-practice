@@ -187,7 +187,33 @@ body {
     }
 }
 
+/* .mixer .track .crop-tool {
+    --_v: 2px;
+    --_h: 5px;
+    --_radius: 10px;
+
+    position: absolute;
+    width: var(--_audio-width);
+    height: 100%;
+    background: black;
+    
+    &[data-status="active"] {
+    }
+
+    &[data-status="active"] .audio-wrapper {
+        clip-path:
+            xywh(
+                var(--_h)
+                var(--_v)
+                calc(var(--_audio-width) - 2 * var(--_h))
+                calc(var(--_track-height) - 2 * var(--_v))
+                round var(--_radius)
+            );
+    }
+} */
+
 .mixer .track .audio-wrapper {
+    --_audio-width: 0px;
     /* need to define --_color, but overwrite with inline style */
     --_color: var(--color-purple);
     --_color-lighter: hsl(from var(--_color) h s calc(l * 1.25));
@@ -195,7 +221,7 @@ body {
 
     position: relative;
     /* isolation: isolate; */
-    /* width: 0px; */
+    width: var(--_audio-width);
     height: 100%;
     color: var(--_color-lighter);
     background-color: var(--_color-darker);
@@ -232,44 +258,56 @@ body {
         /* border-bottom-left-radius: inherit;
         border-bottom-right-radius: inherit; */
     }
-}
 
-.mixer .crop-tool-left,
-.mixer .crop-tool-right {
-    /* isolation: isolate; */
-    /* z-index: 2; */
-    position: absolute;
-    width: 0.5rem;
-    height: 100%;
-    border-radius: 0.375rem;
-    background-color: black;
-}
+    & .crop-tool {
+        --_top: 0px;
+        --_left: 110px;
+        --_bottom: calc(var(--_track-height) - var(--_top));
+        --_right: var(--_audio-width);
+        --_right: calc(var(--_audio-width) - 57px);
 
-.mixer .crop-tool-left {
-    left: 0;
-    transform: translateX(-100%);
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-
-    /* &::after {
-        content: '';
-        z-index: 4;
+        z-index: 3;
         position: absolute;
-        height: 80%;
-        width: 33%;
-        top: 10%;
-        right: 0;
-        transform: translateX(50%);
-        border-radius: inherit;
-        background: var(--_color);
-    } */
-}
+        inset: 0;
+        width: var(--_audio-width);
+        height: 100%;
+        background: rgba(255, 255, 255, 0.5);
+        /* create a frame, adjust private custom attributes above in JS with mousemove */
+        clip-path: polygon(
+            0% 0%,
+            0% 100%,
+            var(--_left) 100%,
+            var(--_left) var(--_top),
+            var(--_right) var(--_top),
+            var(--_right) var(--_bottom),
+            var(--_left) var(--_bottom),
+            var(--_left) 100%,
+            100% 100%,
+            100% 0%
+        );
+    }
 
-.mixer .crop-tool-right {
-    right: 0;
-    transform: translateX(100%);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    & .crop-tool[data-state="inactive"] {
+        display: none;
+    }
+
+    & .crop__left-handle,
+    .crop__right-handle {
+        position: absolute;
+        inset: 0;
+        width: 5px;
+        height: 100%;
+        background: black;
+    }
+    
+    & .crop__left-handle {
+        left: var(--_left);
+        transform: translateX(-100%);
+    }
+
+    & .crop__right-handle {
+        left: var(--_right);
+    }
 }
 
 .mixer > .controls {
