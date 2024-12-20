@@ -24,7 +24,7 @@ A component that imitates an `<input>` element and opens up its content to the D
 
 In this example, the user can mention/tag their friends within a plaintext message to share content. The mentions are styled separately to diffentiate them from the message body.
 
-[1^]One change I did want to make is to replace the username in a mention with the user's name after it loses focus. This in itself wasn't difficult, but there is one quirk that prevents me from keeping it in the current version: when the user tabs to the username, the event sequence is `focus -> blur -> focus` due to the programmatic text selection instead of just `focus`. Therefore, when the username is validated on `blur`, it doesn't recognize the username and unwraps the mention altogether. **If you're reading this and know a relatively simple solution, please let me know!** Trying not to overcomplicate things.
+[^1]One change I did want to make is to replace the username in a mention with the user's name after it loses focus. This in itself wasn't difficult, but there is one quirk that prevents me from keeping it in the current version: when the user tabs to the username, the event sequence is `focus -> blur -> focus` due to the programmatic text selection instead of just `focus`. Therefore, when the username is validated on `blur`, it doesn't recognize the username and unwraps the mention altogether. **If you're reading this and know a relatively simple solution, please let me know!** Trying not to overcomplicate things.
 
 ### tooltip\*
 
