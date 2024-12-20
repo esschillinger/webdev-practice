@@ -20,11 +20,11 @@ A simple backdrop filter card over a colorful background that I thought looked n
 
 ### input_inner-styles
 
-A component that imitates an `<input>` element and opens up its content to the DOM. Doesn't actually use any `<input>` elements, but rather a `<div contenteditable="true">` with a non-negligible amount of JS to keep everything in line.
+A component that imitates an `<input>` element and opens up its content to the DOM. Doesn't actually use any `<input>` elements, but rather a `<div>` with `contenteditable="true"` and a non-negligible amount of JS to keep everything in line. *Technically* finished[^1].
 
 In this example, the user can mention/tag their friends within a plaintext message to share content. The mentions are styled separately to diffentiate them from the message body.
 
-\*Technically finished, though one change I did want to make is to change the username in a mention to the user's name after it loses focus. This in itself wasn't difficult, but there is one quirk that prevents me from keeping it in the current version: when the user tabs to the username, the event sequence is `focus -> blur -> focus` instead of just `focus`. Therefore, when the username is validated on `blur`, it doesn't recognize the username and unwraps the mention altogether. **If you're reading this and know what the fix is, please let me know!**
+[1^]One change I did want to make is to replace the username in a mention with the user's name after it loses focus. This in itself wasn't difficult, but there is one quirk that prevents me from keeping it in the current version: when the user tabs to the username, the event sequence is `focus -> blur -> focus` due to the programmatic text selection instead of just `focus`. Therefore, when the username is validated on `blur`, it doesn't recognize the username and unwraps the mention altogether. **If you're reading this and know a relatively simple solution, please let me know!** Trying not to overcomplicate things.
 
 ### tooltip\*
 
