@@ -271,7 +271,7 @@ body {
         inset: 0;
         width: var(--_audio-width);
         height: 100%;
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(0, 0, 0, 0.4);
         /* create a frame, adjust private custom attributes above in JS with mousemove */
         clip-path: polygon(
             0% 0%,
@@ -295,18 +295,24 @@ body {
     .crop__right-handle {
         position: absolute;
         inset: 0;
-        width: 5px;
+        width: 10px;
         height: 100%;
-        background: black;
+        background: yellow;
+        border-radius: 5px;
+        cursor: col-resize;
     }
     
     & .crop__left-handle {
         left: var(--_left);
         transform: translateX(-100%);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
     }
-
+    
     & .crop__right-handle {
         left: var(--_right);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
     }
 }
 
@@ -343,7 +349,6 @@ body {
 #audio-controls .control {
     display: flex;
     gap: 0.5ch;
-    padding: 1ch;
     border-radius: 0.25ch;
 
     &:not(:has(input[type="range"], button:disabled)):hover {
@@ -359,6 +364,7 @@ body {
     font-family: inherit;
     width: 100%;
     height: 100%;
+    padding: 1ch;
     background: none;
     border: none;
     text-align: left;

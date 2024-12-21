@@ -25,6 +25,9 @@ let initial_audio_left;
 
 let demo_playing = false;
 
+const crop_bar_width = 10;
+let initial_crop_bar_left;
+
 
 function get_custom_property(property, styles) {
     const prop = styles.split(";").find(style => style.includes(property));
@@ -83,8 +86,18 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
     wavesurfer.on("ready", () => {
         const track_width = track_list.getBoundingClientRect().width;
         const ratio = wavesurfer.getDuration() / track_duration;
+        const audio_width = ratio * track_width;
 
-        elem.style.setProperty("--_audio-width", `${ratio * track_width}px`);
+        elem.style.setProperty("--_audio-width", `${audio_width}px`);
+
+        const left = wavesurfer_map.get("start") / wavesurfer.getDuration() * audio_width;
+        const right = wavesurfer_map.get("end") == -1 ? audio_width : wavesurfer_map.get("end") / wavesurfer.getDuration() * audio_width;
+        const crop_tool = elem.querySelector('.crop-tool');
+
+        crop_tool.style.setProperty("--_left", `${left + crop_bar_width}px`);
+        crop_tool.style.setProperty("--_right", `${right - crop_bar_width}px`);
+
+        console.log(left, right);
 
         ready_wavesurfers++;
         if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
@@ -101,56 +114,134 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
 });
 
 
+function move_audio(e) {
+    const container_rect = scroll_container.getBoundingClientRect();
+    const left_margin = container_rect.left;
+    const audio_rect = draggable_audio.getBoundingClientRect();
+    const cursor_left = scroll_container.scrollLeft + e.clientX - left_margin; // cursor left, relative to scroll container
+    const track_width = track_list.getBoundingClientRect().width;
+    
+    if (!draggable_audio.style.left) {
+        draggable_audio.style.left = `${audio_rect.left}px`;
+    }
+
+    let new_audio_left = cursor_left - initial_audio_left;
+    if (new_audio_left < 0) new_audio_left = 0;
+    else if (new_audio_left + audio_rect.width > track_width) {
+        new_audio_left = track_width - audio_rect.width;
+    }
+
+    draggable_audio.style.left = `${new_audio_left}px`;
+}
+
+
+function prevent_audio_move() {
+    if (draggable_audio) {
+        draggable_audio = null;
+        initial_audio_left = null;
+        
+        track_list.removeEventListener("mousemove", move_audio);
+    }
+}
+
+
+function crop_audio_from_left(e) {
+    const audio_rect = cropping_audio.getBoundingClientRect();
+    const cursor_pos = e.clientX - audio_rect.left;
+    const crop_tool = cropping_audio.querySelector(".crop-tool");
+    const right_crop = crop_tool.querySelector(".crop__right-handle");
+    const max_left = parseInt(get_custom_property("--_right", right_crop.parentNode.style.cssText)) - crop_bar_width;
+
+    let new_left = cursor_pos - initial_crop_bar_left;
+
+    if (new_left > max_left) new_left = max_left;
+    else if (new_left < crop_bar_width) new_left = crop_bar_width;
+    
+    crop_tool.style.setProperty("--_left", `${new_left}px`);
+
+    // TODO set wavesurfer map start attribute (ms)
+}
+
+
+function crop_audio_from_right(e) {
+    const audio_rect = cropping_audio.getBoundingClientRect();
+    const cursor_pos = e.clientX - audio_rect.left;
+    const crop_tool = cropping_audio.querySelector(".crop-tool");
+    const left_crop = crop_tool.querySelector(".crop__left-handle");
+    const min_left = parseInt(get_custom_property("--_left", left_crop.parentNode.style.cssText)) + crop_bar_width;
+
+    let new_right = cursor_pos - initial_crop_bar_left;
+    console.log(new_right, min_left, cursor_pos, initial_crop_bar_left, audio_rect.width);
+
+    if (new_right < min_left) new_right = min_left;
+    else if ((new_right + crop_bar_width) > audio_rect.width) new_right = audio_rect.width - crop_bar_width;
+    
+    crop_tool.style.setProperty("--_right", `${new_right}px`);
+
+    // TODO set wavesurfer map end attribute (ms)
+}
+
+
+function prevent_audio_crop() {
+    if (cropping_audio) {
+        console.log('remove');
+        initial_crop_bar_left = null;
+        cropping_audio.removeEventListener("mousemove", crop_audio_from_left);
+        cropping_audio.removeEventListener("mousemove", crop_audio_from_right);
+        
+        // cropping_audio = null;
+    }
+}
+
+
 scroll_container.addEventListener("mousedown", function(e) {
     e.preventDefault();
     demo_playing = false;
     const container_rect = this.getBoundingClientRect();
     const left_margin = container_rect.left;
     const cursor_left = this.scrollLeft + e.clientX - left_margin;
-    
+
+    if (!e.target.offsetParent || !["audio-wrapper", "crop-tool"].some(s => e.target.offsetParent.classList.contains(s))) {
+        slider.style.left = `${cursor_left}px`;
+        console.log(e.target.offsetParent);
+    }
+
+    audio_controls.dataset.state = "hidden";
+});
+
+
+let cropping_audio;
+
+track_list.addEventListener("mousedown", function(e) {
     if (e.target.offsetParent && e.target.offsetParent.classList.contains("audio-wrapper")) {
         draggable_audio = e.target.offsetParent;
         initial_audio_left = e.clientX - draggable_audio.getBoundingClientRect().left;
-        draggable_audio.draggable = true;
-    } else {
-        slider.style.left = `${cursor_left}px`;
-        audio_controls.dataset.state = "hidden";
-    }
-});
-
-
-scroll_container.addEventListener("mouseup", function(e) {
-    if (draggable_audio) {
-        draggable_audio.draggable = false;
-        draggable_audio = null;
-        initial_audio_left = null;
-    }
-});
-
-
-scroll_container.addEventListener("mousemove", function(e) {
-    if (draggable_audio) {
-        const container_rect = scroll_container.getBoundingClientRect();
-        const left_margin = container_rect.left;
-        // const top_margin = container_rect.top;
-
-        const audio_rect = draggable_audio.getBoundingClientRect();
-
-        const cursor_left = scroll_container.scrollLeft + e.clientX - left_margin; // cursor left, relative to scroll container
-        if (!draggable_audio.style.left) {
-            draggable_audio.style.left = `${audio_rect.left}px`;
-        }
-
-        const track_width = track_list.getBoundingClientRect().width;
-        let new_audio_left = cursor_left - initial_audio_left;
-        if (new_audio_left < 0) new_audio_left = 0;
-        else if (new_audio_left + audio_rect.width > track_width) {
-            new_audio_left = track_width - audio_rect.width;
-        }
         
-        draggable_audio.style.left = `${new_audio_left}px`;
+        track_list.addEventListener("mousemove", move_audio);
+
+    } else if (e.target.classList.contains("crop__left-handle")) {
+        initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().left;
+        // cropping_audio = e.target.parentNode.parentNode;
+        console.log('youre here i know it');
+        console.log(cropping_audio);
+        cropping_audio.addEventListener("mousemove", crop_audio_from_left);
+        cropping_audio.addEventListener("mouseup", prevent_audio_crop);
+        cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
+
+    } else if (e.target.classList.contains("crop__right-handle")) {
+        initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__right-handle").getBoundingClientRect().left;
+        // cropping_audio = e.target.parentNode.parentNode;
+        console.log('youre here i know it');
+        console.log(cropping_audio);
+        cropping_audio.addEventListener("mousemove", crop_audio_from_right);
+        cropping_audio.addEventListener("mouseup", prevent_audio_crop);
+        cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
     }
 });
+
+
+track_list.addEventListener("mouseup", prevent_audio_move);
+track_list.addEventListener("mouseleave", prevent_audio_move);
 
 
 const zoom_increment = 10;
@@ -288,8 +379,22 @@ unmute_button.addEventListener("mousedown", () => mute_audio(false));
 
 
 crop_button.addEventListener("click", () => {
-    const crop_tool = scroll_container.querySelector(`.audio-wrapper[data-id="${audio_controls.dataset.audioid}"] .crop-tool`);
-    crop_tool.dataset.state = crop_tool.dataset.state == "active" ? "inactive" : "active";
+    if (cropping_audio && cropping_audio.dataset.id != audio_controls.dataset.audioid) {
+        // deactivate crop if another crop tool is activated
+        cropping_audio.querySelector(".crop-tool").dataset.state = "inactive";
+    }
+
+    cropping_audio = track_list.querySelector(`.audio-wrapper[data-id="${audio_controls.dataset.audioid}"]`);
+    const crop_tool = cropping_audio.querySelector(".crop-tool");
+
+    if (crop_tool.dataset.state == "active") {
+        crop_tool.dataset.state = "inactive";
+        cropping_audio = null;
+
+    } else {
+        crop_tool.dataset.state = "active";
+    }
+    // crop_tool.dataset.state = crop_tool.dataset.state == "active" ? "inactive" : "active";
 
     audio_controls.dataset.state = "hidden";
 });
@@ -353,9 +458,17 @@ play_button.addEventListener("click", () => {
         if (!v.get("muted") && play_audio.get(k)) {
             const t = setTimeout(() => {
                 v.get("wavesurfer").play();
-            }, v.get("delay"));
-    
+            }, v.get("delay") + v.get("start"));
+            
             timeouts.push(t);
+
+            if (v.get("end") != -1) {
+                const t2 = setTimeout(() => {
+                    v.get("wavesurfer").pause();
+                }, v.get("delay") + v.get("end"));
+
+                timeouts.push(t2);
+            }
         }
     }
 
