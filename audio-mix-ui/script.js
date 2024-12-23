@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
+mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
     // const css = elem.style.cssText;
     // const color_property = css.split(";").find(style => style.includes("--_color"));
     // const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
@@ -70,7 +70,8 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
         waveColor : `hsl(from ${color} h s calc(l * 1.25))`,
         progressColor : color, // var(--_color)
         cursorWidth : 0,
-        url : "test_audio.ogg",
+        url : elem.dataset.file,
+        backend: 'MediaElement'
     });
 
     let wavesurfer_map = new Map();
@@ -94,10 +95,8 @@ mixer.querySelectorAll('.audio-wrapper').forEach((elem) => {
         const right = wavesurfer_map.get("end") == -1 ? audio_width : wavesurfer_map.get("end") / wavesurfer.getDuration() * audio_width;
         const crop_tool = elem.querySelector('.crop-tool');
 
-        crop_tool.style.setProperty("--_left", `${left + crop_bar_width}px`);
-        crop_tool.style.setProperty("--_right", `${right - crop_bar_width}px`);
-
-        console.log(left, right);
+        crop_tool.style.setProperty("--_left", `${left}px`);
+        crop_tool.style.setProperty("--_right", `${right}px`);
 
         ready_wavesurfers++;
         if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
@@ -150,12 +149,12 @@ function crop_audio_from_left(e) {
     const cursor_pos = e.clientX - audio_rect.left;
     const crop_tool = cropping_audio.querySelector(".crop-tool");
     const right_crop = crop_tool.querySelector(".crop__right-handle");
-    const max_left = parseInt(get_custom_property("--_right", right_crop.parentNode.style.cssText)) - crop_bar_width;
+    const max_left = parseInt(get_custom_property("--_right", right_crop.parentNode.style.cssText));
 
     let new_left = cursor_pos - initial_crop_bar_left;
 
     if (new_left > max_left) new_left = max_left;
-    else if (new_left < crop_bar_width) new_left = crop_bar_width;
+    else if (new_left < 0) new_left = 0;
     
     crop_tool.style.setProperty("--_left", `${new_left}px`);
 
@@ -168,13 +167,12 @@ function crop_audio_from_right(e) {
     const cursor_pos = e.clientX - audio_rect.left;
     const crop_tool = cropping_audio.querySelector(".crop-tool");
     const left_crop = crop_tool.querySelector(".crop__left-handle");
-    const min_left = parseInt(get_custom_property("--_left", left_crop.parentNode.style.cssText)) + crop_bar_width;
+    const min_left = parseInt(get_custom_property("--_left", left_crop.parentNode.style.cssText));
 
     let new_right = cursor_pos - initial_crop_bar_left;
-    console.log(new_right, min_left, cursor_pos, initial_crop_bar_left, audio_rect.width);
 
     if (new_right < min_left) new_right = min_left;
-    else if ((new_right + crop_bar_width) > audio_rect.width) new_right = audio_rect.width - crop_bar_width;
+    else if (new_right > audio_rect.width) new_right = audio_rect.width;
     
     crop_tool.style.setProperty("--_right", `${new_right}px`);
 
@@ -184,7 +182,6 @@ function crop_audio_from_right(e) {
 
 function prevent_audio_crop() {
     if (cropping_audio) {
-        console.log('remove');
         initial_crop_bar_left = null;
         cropping_audio.removeEventListener("mousemove", crop_audio_from_left);
         cropping_audio.removeEventListener("mousemove", crop_audio_from_right);
@@ -203,7 +200,6 @@ scroll_container.addEventListener("mousedown", function(e) {
 
     if (!e.target.offsetParent || !["audio-wrapper", "crop-tool"].some(s => e.target.offsetParent.classList.contains(s))) {
         slider.style.left = `${cursor_left}px`;
-        console.log(e.target.offsetParent);
     }
 
     audio_controls.dataset.state = "hidden";
@@ -222,8 +218,6 @@ track_list.addEventListener("mousedown", function(e) {
     } else if (e.target.classList.contains("crop__left-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().left;
         // cropping_audio = e.target.parentNode.parentNode;
-        console.log('youre here i know it');
-        console.log(cropping_audio);
         cropping_audio.addEventListener("mousemove", crop_audio_from_left);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);
         cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
@@ -231,8 +225,6 @@ track_list.addEventListener("mousedown", function(e) {
     } else if (e.target.classList.contains("crop__right-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__right-handle").getBoundingClientRect().left;
         // cropping_audio = e.target.parentNode.parentNode;
-        console.log('youre here i know it');
-        console.log(cropping_audio);
         cropping_audio.addEventListener("mousemove", crop_audio_from_right);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);
         cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
@@ -307,14 +299,24 @@ function track_zoom(e) {
 
     mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
         const new_track_width = track_list.getBoundingClientRect().width;
-        const ratio = audio_map.get(elem.dataset.id).get("wavesurfer").getDuration() / track_duration;
-        
-        elem.style.setProperty("--_audio-width", `${ratio * new_track_width}px`);
+        const audio_ratio = audio_map.get(elem.dataset.id).get("wavesurfer").getDuration() / track_duration;
+        const initial_audio_width = parseInt(get_custom_property("--_audio-width", elem.style.cssText));
+        const new_audio_width = audio_ratio * new_track_width;
+        const crop_ratio = new_audio_width / initial_audio_width;
+
+        elem.style.setProperty("--_audio-width", `${new_audio_width}px`);
         let offset = elem.style.left === "" ? 0 : parseFloat(elem.style.left);
         
         if (offset != 0) {
             elem.style.left = `${offset * (new_track_width / initial_track_width)}px`;
         }
+
+        const crop_tool = elem.querySelector(".crop-tool");
+        const initial_crop_left = parseInt(get_custom_property("--_left", crop_tool.style.cssText));
+        const initial_crop_right = parseInt(get_custom_property("--_right", crop_tool.style.cssText));
+
+        crop_tool.style.setProperty("--_left", `${initial_crop_left * crop_ratio}px`);
+        crop_tool.style.setProperty("--_right", `${initial_crop_right * crop_ratio}px`);
     });
 
     // force slider to stay in the track if zoom out makes its left larger than track width
@@ -423,10 +425,12 @@ play_button.addEventListener("click", () => {
     let play_audio = new Map();
 
     mixer.querySelectorAll('.audio-wrapper:not([data-muted="true"])').forEach((elem) => {
+        const audio_width = parseInt(get_custom_property("--_audio-width", elem.style.cssText));
         const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
-        const audio_end = audio_start + parseInt(get_custom_property("--_audio-width", elem.style.cssText));
+        const audio_end = audio_start + audio_width;
         const wavesurfer = audio_map.get(elem.dataset.id).get("wavesurfer");
 
+        // set audio delays
         if (slider_position < audio_end) {
             let delay;
             // audio needs to be played
@@ -448,6 +452,30 @@ play_button.addEventListener("click", () => {
 
             audio_map.get(elem.dataset.id).set("delay", delay);
         }
+
+        // manage audio cropping
+        const crop_tool = elem.querySelector(".crop-tool");
+        const crop_left = parseInt(get_custom_property("--_left", crop_tool.style.cssText));
+        const crop_right = parseInt(get_custom_property("--_right", crop_tool.style.cssText));
+        let start;
+        let end;
+
+        // left side is cropped
+        if (crop_left > 0) {
+            start = Math.floor(crop_left / audio_width * wavesurfer.getDuration() * 1000); // convert to ms
+        } else {
+            start = 0; // reset if audio used to be cropped
+        }
+        
+        // right side is cropped
+        if (crop_right < audio_width) {
+            end = Math.ceil(crop_right / audio_width * wavesurfer.getDuration() * 1000); // convert to ms
+        } else {
+            end = -1; // reset if audio used to be cropped
+        }
+
+        audio_map.get(elem.dataset.id).set("start", start);
+        audio_map.get(elem.dataset.id).set("end", end);
     });
 
     // play audio outside of the config/preprocess forEach because setTime() takes a nonnegligible length of time to complete, even for small audio file sets
@@ -456,16 +484,23 @@ play_button.addEventListener("click", () => {
 
     for (const [k, v] of audio_map.entries()) {
         if (!v.get("muted") && play_audio.get(k)) {
+            const wavesurfer = v.get("wavesurfer");
+            const start = v.get("start");
+            const end = v.get("end");
+            const delay = v.get("delay");
+
+            if (start != 0) v.get("wavesurfer").setTime(start / 1000);
+
             const t = setTimeout(() => {
-                v.get("wavesurfer").play();
-            }, v.get("delay") + v.get("start"));
+                wavesurfer.play();
+            }, delay + start);
             
             timeouts.push(t);
 
-            if (v.get("end") != -1) {
+            if (end != -1) {
                 const t2 = setTimeout(() => {
-                    v.get("wavesurfer").pause();
-                }, v.get("delay") + v.get("end"));
+                    wavesurfer.pause();
+                }, delay + end);
 
                 timeouts.push(t2);
             }

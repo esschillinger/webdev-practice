@@ -18,6 +18,14 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+.icon__left-chevron {
+    mask-image: url("chevron-left-solid.svg");
+}
+
+.icon__right-chevron {
+    mask-image: url("chevron-right-solid.svg");
+}
+
 .mixer {
     /* duration in seconds (for now) */
     --_duration: 40;
@@ -66,6 +74,10 @@ body {
     } */
 }
 
+.mixer > #phantom-audio {
+    display: none;
+}
+
 .mixer > .main-wrapper {
     display: flex;
     overflow: hidden;
@@ -93,7 +105,7 @@ body {
     --_handle-height: calc(var(--_handle-width) / 2);
     --_handle-color: var(--color-blue);
 
-    z-index: 4;
+    z-index: 5;
     position: absolute;
     top: 0;
     /* can use percentages/relative values when .slider is a child of .track-list  */
@@ -130,8 +142,8 @@ body {
 }
 
 .mixer .timeline-wrapper {
-    /* use z-index: 3 to cover canvas elements in shadow DOM (they must use z-index: 2 or something) */
-    z-index: 3;
+    /* use z-index: 4 to cover .crop-tool and canvas elements in shadow DOM (they must use z-index: 2 or something) */
+    z-index: 4;
     position: sticky;
     top: 0;
     background: var(--_bg-color);
@@ -228,7 +240,7 @@ body {
     /* border-radius: 1ch; */
 
     &::before {
-        content: attr(data-title);
+        content: attr(data-file);
         position: absolute;
         inset: 0;
         height: fit-content;
@@ -260,31 +272,37 @@ body {
     }
 
     & .crop-tool {
-        --_top: 0px;
-        --_left: 110px;
-        --_bottom: calc(var(--_track-height) - var(--_top));
+        --_bar-width: 10px;
+        --_border-width: calc(var(--_bar-width) / 2);
+        --_crop-color: yellow;
+        /* inset custom properties bound the audio that is to be played (inside of frame); NOT the element positions */
+        --_top: var(--_border-width);
+        --_left: var(--_bar-width);
+        --_bottom: calc(var(--_track-height) - var(--_border-width));
         --_right: var(--_audio-width);
-        --_right: calc(var(--_audio-width) - 57px);
 
         z-index: 3;
         position: absolute;
-        inset: 0;
-        width: var(--_audio-width);
+        top: 0;
+        left: calc(-1 * var(--_bar-width));
+        width: calc(var(--_audio-width) + (2 * var(--_bar-width)));
         height: 100%;
         background: rgba(0, 0, 0, 0.4);
         /* create a frame, adjust private custom attributes above in JS with mousemove */
+        /* adjust left and right to account for the fact that .crop-tool is shifted --_bar-width to the left so the window is offset */
         clip-path: polygon(
             0% 0%,
             0% 100%,
-            var(--_left) 100%,
-            var(--_left) var(--_top),
-            var(--_right) var(--_top),
-            var(--_right) var(--_bottom),
-            var(--_left) var(--_bottom),
-            var(--_left) 100%,
+            calc(var(--_left) + var(--_bar-width)) 100%,
+            calc(var(--_left) + var(--_bar-width)) var(--_top),
+            calc(var(--_right) + var(--_bar-width)) var(--_top),
+            calc(var(--_right) + var(--_bar-width)) var(--_bottom),
+            calc(var(--_left) + var(--_bar-width)) var(--_bottom),
+            calc(var(--_left) + var(--_bar-width)) 100%,
             100% 100%,
             100% 0%
         );
+        /* transform: translateX(calc(-1 * var(--_bar-width))); */
     }
 
     & .crop-tool[data-state="inactive"] {
@@ -295,24 +313,43 @@ body {
     .crop__right-handle {
         position: absolute;
         inset: 0;
-        width: 10px;
+        width: var(--_bar-width);
         height: 100%;
-        background: yellow;
+        background: var(--_crop-color);
         border-radius: 5px;
         cursor: col-resize;
     }
     
     & .crop__left-handle {
         left: var(--_left);
-        transform: translateX(-100%);
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
     }
     
     & .crop__right-handle {
-        left: var(--_right);
+        left: calc(var(--_right) + var(--_bar-width));
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
+    }
+
+    & .crop__top-border,
+    .crop__bottom-border {
+        position: absolute;
+        inset: 0;
+        left: calc(var(--_left) + var(--_bar-width));
+        width: calc(var(--_right) - var(--_left));
+        height: var(--_border-width);
+        background: var(--_crop-color);
+    }
+
+    & .crop__top-border {
+        bottom: var(--_top);
+    }
+
+    & .crop__bottom-border {
+        /* i have no idea why bottom: 0 isn't working */
+        top: var(--_bottom);
+        /* top: revert; */
     }
 }
 
