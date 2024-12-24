@@ -281,6 +281,9 @@ body {
         --_bottom: calc(var(--_track-height) - var(--_border-width));
         --_right: var(--_audio-width);
 
+        --_crop-left-overflow: 0px;
+        --_crop-right-overflow: 0px;
+
         z-index: 3;
         position: absolute;
         top: 0;
@@ -290,7 +293,7 @@ body {
         background: rgba(0, 0, 0, 0.4);
         /* create a frame, adjust private custom attributes above in JS with mousemove */
         /* adjust left and right to account for the fact that .crop-tool is shifted --_bar-width to the left so the window is offset */
-        clip-path: polygon(
+        /* clip-path: polygon(
             0% 0%,
             0% 100%,
             calc(var(--_left) + var(--_bar-width)) 100%,
@@ -301,7 +304,21 @@ body {
             calc(var(--_left) + var(--_bar-width)) 100%,
             100% 100%,
             100% 0%
+        ); */
+
+        clip-path: polygon(
+            var(--_crop-left-overflow) 0%,
+            var(--_crop-left-overflow) 100%,
+            calc(var(--_left) + var(--_bar-width)) 100%,
+            calc(var(--_left) + var(--_bar-width)) var(--_top),
+            calc(var(--_right) + var(--_bar-width)) var(--_top),
+            calc(var(--_right) + var(--_bar-width)) var(--_bottom),
+            calc(var(--_left) + var(--_bar-width)) var(--_bottom),
+            calc(var(--_left) + var(--_bar-width)) 100%,
+            calc(var(--_audio-width) + 2 * var(--_bar-width) - var(--_crop-right-overflow)) 100%,
+            calc(var(--_audio-width) + 2 * var(--_bar-width) - var(--_crop-right-overflow)) 0%
         );
+
         /* transform: translateX(calc(-1 * var(--_bar-width))); */
     }
 

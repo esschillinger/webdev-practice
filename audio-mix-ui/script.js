@@ -155,8 +155,14 @@ function crop_audio_from_left(e) {
 
     if (new_left > max_left) new_left = max_left;
     else if (new_left < 0) new_left = 0;
-    
+
+    let crop_left_overflow = 0;
+
+    if (new_left < crop_bar_width) crop_left_overflow = new_left;
+    else crop_left_overflow = crop_bar_width;
+
     crop_tool.style.setProperty("--_left", `${new_left}px`);
+    crop_tool.style.setProperty("--_crop-left-overflow", `${crop_left_overflow}px`);
 
     // TODO set wavesurfer map start attribute (ms)
 }
@@ -173,8 +179,14 @@ function crop_audio_from_right(e) {
 
     if (new_right < min_left) new_right = min_left;
     else if (new_right > audio_rect.width) new_right = audio_rect.width;
-    
+
+    let crop_right_overflow = 0;
+
+    if (new_right > (audio_rect.width - crop_bar_width)) crop_right_overflow = audio_rect.width - new_right;
+    else crop_right_overflow = crop_bar_width;
+
     crop_tool.style.setProperty("--_right", `${new_right}px`);
+    crop_tool.style.setProperty("--_crop-right-overflow", `${crop_right_overflow}px`);
 
     // TODO set wavesurfer map end attribute (ms)
 }
