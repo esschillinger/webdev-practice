@@ -216,7 +216,7 @@ track_list.addEventListener("mousedown", function(e) {
         track_list.addEventListener("mousemove", move_audio);
 
     } else if (e.target.classList.contains("crop__left-handle")) {
-        initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().left;
+        initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().right;
         // cropping_audio = e.target.parentNode.parentNode;
         cropping_audio.addEventListener("mousemove", crop_audio_from_left);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);

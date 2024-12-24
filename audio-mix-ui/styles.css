@@ -277,7 +277,7 @@ body {
         --_crop-color: yellow;
         /* inset custom properties bound the audio that is to be played (inside of frame); NOT the element positions */
         --_top: var(--_border-width);
-        --_left: var(--_bar-width);
+        --_left: 0px;
         --_bottom: calc(var(--_track-height) - var(--_border-width));
         --_right: var(--_audio-width);
 
