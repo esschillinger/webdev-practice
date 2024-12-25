@@ -9,6 +9,9 @@ html {
 }
 
 body {
+    /* set text color for icons */
+    --color-text: black;
+
     margin: 0;
     width: 100dvw;
     height: 100dvh;
@@ -16,6 +19,22 @@ body {
     place-items: center;
     background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
     font-family: 'Open Sans', sans-serif;
+}
+
+.icon__check {
+    mask-image: url("check-solid.svg");
+}
+
+.icon__xmark {
+    mask-image: url("xmark-solid.svg");
+}
+
+.icon__zoom-in {
+    mask-image: url("magnifying-glass-plus-solid.svg");
+}
+
+.icon__zoom-out {
+    mask-image: url("magnifying-glass-minus-solid.svg");
 }
 
 .icon__left-chevron {
@@ -45,6 +64,8 @@ body {
     aspect-ratio: 2 / 1;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
     background: var(--_bg-color);
     border-radius: 0.5rem;
     overflow: hidden;
@@ -78,17 +99,37 @@ body {
     display: none;
 }
 
-.mixer > .main-wrapper {
+.mixer > .mixer__toolbar {
     display: flex;
-    overflow: hidden;
-    padding: 1rem;
-    
-    & .track-controls {
-        /* width: fit-content; */
-        width: 20%;
-        overflow: auto;
-        /* resize: horizontal; */
+    justify-content: end;
+    align-items: center;
+    gap: 1rem;
+
+    & .action-group {
+        display: flex;
     }
+
+    & .icon-wrapper {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+
+    & button.icon-wrapper:has(.icon__check) {
+        background: var(--color-viridian);
+    }
+
+    & button.icon-wrapper:has(.icon__xmark) {
+        background: var(--color-red);
+    }
+}
+
+.mixer:not(:has(.crop-tool[data-state="active"])) button.icon-wrapper:has(.icon__check, .icon__xmark) {
+    display: none;
+}
+
+.mixer > .main-wrapper {
+    overflow: hidden;
+    /* padding-inline: 1rem; */
     
     & .scroll-wrapper {
         position: relative;
@@ -142,14 +183,18 @@ body {
 }
 
 .mixer .timeline-wrapper {
+    --_tl-color-soft: hsl(from var(--_bg-color) h s calc(l * 1.1));
+    --_tl-color-medium: hsl(from var(--_bg-color) h s calc(l * 1.5));
+    --_tl-color-heavy: hsl(from var(--_bg-color) h s calc(l * 2));
+
     /* use z-index: 4 to cover .crop-tool and canvas elements in shadow DOM (they must use z-index: 2 or something) */
     z-index: 4;
     position: sticky;
     top: 0;
     background: var(--_bg-color);
-    border-bottom: 5px solid yellow;
+    /* border-bottom: 5px solid yellow; */
     width: var(--_track-width);
-    /* border-bottom: 5px solid var(--_accent-color); */
+    border-bottom: 5px solid var(--_accent-color);
 
     & .timeline {
         --_timeline-std-height: 20px;
@@ -159,26 +204,30 @@ body {
         grid-auto-flow: column;
     }
 
+    & .timeline > * {
+        align-self: end;
+    }
+
     & .timeline > *:not(:nth-child(5n)) {
         height: var(--_timeline-std-height);
-        border-left: 1px solid hsl(from var(--_bg-color) h s calc(l * 1.1));
-        border-right: 1px solid hsl(from var(--_bg-color) h s calc(l * 1.1));
+        border-left: 1px solid var(--_tl-color-soft);
+        border-right: 1px solid var(--_tl-color-soft);
     }
 
     & .timeline > *:nth-child(5n) {
         position: relative;
         height: calc(var(--_timeline-std-height) * 2);
-        border-right: 2px solid hsl(from var(--_bg-color) h s calc(l * 1.5));
+        border-right: 2px solid var(--_tl-color-medium);
     }
 
     & .timeline > *:nth-child(5n)::before {
         content: attr(data-value);
         position: absolute;
+        top: 0;
         right: 0;
-        bottom: 0;
-        transform: translate(50%, 100%);
+        transform: translate(50%, -100%);
         line-height: 1;
-        color: hsl(from var(--_bg-color) h s calc(l * 2));
+        color: var(--_tl-color-heavy);
     }
 }
 
@@ -199,31 +248,6 @@ body {
     }
 }
 
-/* .mixer .track .crop-tool {
-    --_v: 2px;
-    --_h: 5px;
-    --_radius: 10px;
-
-    position: absolute;
-    width: var(--_audio-width);
-    height: 100%;
-    background: black;
-    
-    &[data-status="active"] {
-    }
-
-    &[data-status="active"] .audio-wrapper {
-        clip-path:
-            xywh(
-                var(--_h)
-                var(--_v)
-                calc(var(--_audio-width) - 2 * var(--_h))
-                calc(var(--_track-height) - 2 * var(--_v))
-                round var(--_radius)
-            );
-    }
-} */
-
 .mixer .track .audio-wrapper {
     --_audio-width: 0px;
     /* need to define --_color, but overwrite with inline style */
@@ -231,13 +255,32 @@ body {
     --_color-lighter: hsl(from var(--_color) h s calc(l * 1.25));
     --_color-darker: hsl(from var(--_color) h s calc(l * 0.5));
 
+    /* inset custom properties bound the audio that is to be played (inside of frame); NOT the element positions */
+    --_left: 0px;
+    --_right: var(--_audio-width);
+
     position: relative;
     /* isolation: isolate; */
     width: var(--_audio-width);
     height: 100%;
     color: var(--_color-lighter);
     background-color: var(--_color-darker);
+    cursor: context-menu;
     /* border-radius: 1ch; */
+    
+    &.cropped:has(.crop-tool[data-state="inactive"]) {
+        clip-path: polygon(
+            var(--_left) 0%,
+            var(--_left) 100%,
+            var(--_right) 100%,
+            var(--_right) 0%
+        );
+
+        &::before {
+            left: var(--_left);
+            width: calc(var(--_right) - var(--_left));
+        }
+    }
 
     &::before {
         content: attr(data-file);
@@ -272,15 +315,12 @@ body {
     }
 
     & .crop-tool {
-        --_bar-width: 10px;
-        --_border-width: calc(var(--_bar-width) / 2);
+        --_bar-width: 30px;
+        --_border-width: calc(var(--_bar-width) / 6);
         --_crop-color: yellow;
-        /* inset custom properties bound the audio that is to be played (inside of frame); NOT the element positions */
-        --_top: var(--_border-width);
-        --_left: 0px;
-        --_bottom: calc(var(--_track-height) - var(--_border-width));
-        --_right: var(--_audio-width);
 
+        --_top: var(--_border-width);
+        --_bottom: calc(var(--_track-height) - var(--_border-width));
         --_crop-left-overflow: 0px;
         --_crop-right-overflow: 0px;
 
@@ -328,13 +368,21 @@ body {
 
     & .crop__left-handle,
     .crop__right-handle {
+        display: grid;
+        place-items: center;
         position: absolute;
         inset: 0;
         width: var(--_bar-width);
         height: 100%;
         background: var(--_crop-color);
+        border: none;
         border-radius: 5px;
-        cursor: col-resize;
+        cursor: ew-resize;
+        /* cursor: pointer; */
+
+        &:active:hover {
+            transform: none;
+        }
     }
     
     & .crop__left-handle {
@@ -347,6 +395,11 @@ body {
         left: calc(var(--_right) + var(--_bar-width));
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
+    }
+
+    & .crop-tool i {
+        width: 20px;
+        height: 20px;
     }
 
     & .crop__top-border,

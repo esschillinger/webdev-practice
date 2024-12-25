@@ -46,7 +46,7 @@ button.icon-wrapper:active:hover {
     transform: scale(0.95);
 }
 
-button.icon-wrapper:has(div + span):active:hover {
+button.icon-wrapper:has(i, div + span):active:hover {
     transform: scale(0.98);
 }
 
@@ -74,4 +74,33 @@ button.icon-wrapper:has(div + span):active:hover {
 
 .icon-wrapper > span.icon__description {
     font-size: 0.9rem;
+}
+
+.chip {
+    --_padding: 0.75ch;
+    border-radius: 0.75ch;
+    font-weight: 500;
+    color: var(--_chip-color);
+    background-color: rgb(from var(--_chip-color) r g b / 0.25);
+    transition: color 250ms ease,
+                background-color 250ms ease;
+}
+
+.chip:hover {
+    color: white;
+    background-color: var(--_chip-color);
+}
+
+.chip:not(:has(> *)) {
+    padding: var(--_padding);
+}
+
+.chip > * {
+    padding: var(--_padding);
+}
+
+.chip > a {
+    color: inherit;
+    /* height: 100% !important; */
+    /* width: 100% !important; */
 }

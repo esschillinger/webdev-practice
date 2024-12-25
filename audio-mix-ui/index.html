@@ -34,6 +34,25 @@
     
     <div class="mixer" style="--_duration: 20; --_timeline-width: 50px; --_timeline-space-duration: 1;" data-state="loading">
         <audio src="test_audio.ogg" id="phantom-audio" muted="true" loop="true"></audio>
+
+        <div class="mixer__toolbar">
+            <button class="icon-wrapper">
+                <i class="icon icon__xmark"></i>
+                <span>Discard changes</span>
+            </button>
+            <button class="icon-wrapper">
+                <i class="icon icon__check"></i>
+                <span>Apply changes</span>
+            </button>
+            <div class="action-group">
+                <button class="icon-wrapper">
+                    <i class="icon icon__zoom-out"></i>
+                </button>
+                <button class="icon-wrapper">
+                    <i class="icon icon__zoom-in"></i>
+                </button>
+            </div>
+        </div>
         
         <div class="main-wrapper">
             <!-- <div class="track-controls">
@@ -54,8 +73,12 @@
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-id="0" data-file="test_audio.ogg">
                             <div class="crop-tool" data-state="inactive">
-                                <div class="crop__left-handle"></div>
-                                <div class="crop__right-handle"></div>
+                                <button class="crop__left-handle icon-wrapper">
+                                    <i class="icon icon__left-chevron"></i>
+                                </button>
+                                <button class="crop__right-handle icon-wrapper">
+                                    <i class="icon icon__right-chevron"></i>
+                                </button>
                                 <div class="crop__top-border"></div>
                                 <div class="crop__bottom-border"></div>
                             </div>
@@ -64,8 +87,12 @@
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-id="1" data-file="test_audio.ogg">
                             <div class="crop-tool" data-state="inactive">
-                                <div class="crop__left-handle"></div>
-                                <div class="crop__right-handle"></div>
+                                <button class="crop__left-handle icon-wrapper">
+                                    <i class="icon icon__left-chevron"></i>
+                                </button>
+                                <button class="crop__right-handle icon-wrapper">
+                                    <i class="icon icon__right-chevron"></i>
+                                </button>
                                 <div class="crop__top-border"></div>
                                 <div class="crop__bottom-border"></div>
                             </div>
@@ -74,8 +101,12 @@
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(0, 70%, 48%);" data-id="2" data-file="test_audio.ogg">
                             <div class="crop-tool" data-state="inactive">
-                                <div class="crop__left-handle"></div>
-                                <div class="crop__right-handle"></div>
+                                <button class="crop__left-handle icon-wrapper">
+                                    <i class="icon icon__left-chevron"></i>
+                                </button>
+                                <button class="crop__right-handle icon-wrapper">
+                                    <i class="icon icon__right-chevron"></i>
+                                </button>
                                 <div class="crop__top-border"></div>
                                 <div class="crop__bottom-border"></div>
                             </div>
@@ -84,8 +115,12 @@
                     <div class="track">
                         <div class="audio-wrapper" style="--_color: hsl(136, 54%, 43%);" data-id="3" data-file="test_audio.ogg">
                             <div class="crop-tool" data-state="inactive">
-                                <div class="crop__left-handle"></div>
-                                <div class="crop__right-handle"></div>
+                                <button class="crop__left-handle icon-wrapper">
+                                    <i class="icon icon__left-chevron"></i>
+                                </button>
+                                <button class="crop__right-handle icon-wrapper">
+                                    <i class="icon icon__right-chevron"></i>
+                                </button>
                                 <div class="crop__top-border"></div>
                                 <div class="crop__bottom-border"></div>
                             </div>

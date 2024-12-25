@@ -15,6 +15,12 @@ const crop_button = audio_controls.querySelector("#crop");
 const restore_button = audio_controls.querySelector("#restore");
 const volume = audio_controls.querySelector("#volume");
 
+const mixer_toolbar = mixer.querySelector(".mixer__toolbar");
+const apply_change_button = mixer_toolbar.querySelector("button:has(.icon__check)");
+const discard_change_button = mixer_toolbar.querySelector("button:has(.icon__xmark)");
+const zoom_in_button = mixer_toolbar.querySelector("button:has(.icon__zoom-in)");
+const zoom_out_button = mixer_toolbar.querySelector("button:has(.icon__zoom-out)");
+
 let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
@@ -25,7 +31,7 @@ let initial_audio_left;
 
 let demo_playing = false;
 
-const crop_bar_width = 10;
+const crop_bar_width = 30;
 let initial_crop_bar_left;
 
 
@@ -93,10 +99,10 @@ mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
 
         const left = wavesurfer_map.get("start") / wavesurfer.getDuration() * audio_width;
         const right = wavesurfer_map.get("end") == -1 ? audio_width : wavesurfer_map.get("end") / wavesurfer.getDuration() * audio_width;
-        const crop_tool = elem.querySelector('.crop-tool');
+        // const crop_tool = elem.querySelector('.crop-tool');
 
-        crop_tool.style.setProperty("--_left", `${left}px`);
-        crop_tool.style.setProperty("--_right", `${right}px`);
+        elem.style.setProperty("--_left", `${left}px`);
+        elem.style.setProperty("--_right", `${right}px`);
 
         ready_wavesurfers++;
         if (ready_wavesurfers == total_wavesurfers) mixer.dataset.state = "ready";
@@ -148,8 +154,7 @@ function crop_audio_from_left(e) {
     const audio_rect = cropping_audio.getBoundingClientRect();
     const cursor_pos = e.clientX - audio_rect.left;
     const crop_tool = cropping_audio.querySelector(".crop-tool");
-    const right_crop = crop_tool.querySelector(".crop__right-handle");
-    const max_left = parseInt(get_custom_property("--_right", right_crop.parentNode.style.cssText));
+    const max_left = parseInt(get_custom_property("--_right", cropping_audio.style.cssText));
 
     let new_left = cursor_pos - initial_crop_bar_left;
 
@@ -161,10 +166,8 @@ function crop_audio_from_left(e) {
     if (new_left < crop_bar_width) crop_left_overflow = new_left;
     else crop_left_overflow = crop_bar_width;
 
-    crop_tool.style.setProperty("--_left", `${new_left}px`);
+    cropping_audio.style.setProperty("--_left", `${new_left}px`);
     crop_tool.style.setProperty("--_crop-left-overflow", `${crop_left_overflow}px`);
-
-    // TODO set wavesurfer map start attribute (ms)
 }
 
 
@@ -172,8 +175,7 @@ function crop_audio_from_right(e) {
     const audio_rect = cropping_audio.getBoundingClientRect();
     const cursor_pos = e.clientX - audio_rect.left;
     const crop_tool = cropping_audio.querySelector(".crop-tool");
-    const left_crop = crop_tool.querySelector(".crop__left-handle");
-    const min_left = parseInt(get_custom_property("--_left", left_crop.parentNode.style.cssText));
+    const min_left = parseInt(get_custom_property("--_left", cropping_audio.style.cssText));
 
     let new_right = cursor_pos - initial_crop_bar_left;
 
@@ -185,10 +187,8 @@ function crop_audio_from_right(e) {
     if (new_right > (audio_rect.width - crop_bar_width)) crop_right_overflow = audio_rect.width - new_right;
     else crop_right_overflow = crop_bar_width;
 
-    crop_tool.style.setProperty("--_right", `${new_right}px`);
+    cropping_audio.style.setProperty("--_right", `${new_right}px`);
     crop_tool.style.setProperty("--_crop-right-overflow", `${crop_right_overflow}px`);
-
-    // TODO set wavesurfer map end attribute (ms)
 }
 
 
@@ -210,8 +210,10 @@ scroll_container.addEventListener("mousedown", function(e) {
     const left_margin = container_rect.left;
     const cursor_left = this.scrollLeft + e.clientX - left_margin;
 
-    if (!e.target.offsetParent || !["audio-wrapper", "crop-tool"].some(s => e.target.offsetParent.classList.contains(s))) {
-        slider.style.left = `${cursor_left}px`;
+    if (!e.target.offsetParent || !["audio-wrapper", "crop-tool"].some(s => e.target.offsetParent.classList.contains(s) || e.target.offsetParent.parentNode.classList.contains(s))) {
+        if (cursor_left < track_list.getBoundingClientRect().width) {
+            slider.style.left = `${cursor_left}px`;
+        }
     }
 
     audio_controls.dataset.state = "hidden";
@@ -227,14 +229,14 @@ track_list.addEventListener("mousedown", function(e) {
         
         track_list.addEventListener("mousemove", move_audio);
 
-    } else if (e.target.classList.contains("crop__left-handle")) {
+    } else if (e.target.classList.contains("crop__left-handle") || e.target.offsetParent.classList.contains("crop__left-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().right;
         // cropping_audio = e.target.parentNode.parentNode;
         cropping_audio.addEventListener("mousemove", crop_audio_from_left);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);
         cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
 
-    } else if (e.target.classList.contains("crop__right-handle")) {
+    } else if (e.target.classList.contains("crop__right-handle") || e.target.offsetParent.classList.contains("crop__right-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__right-handle").getBoundingClientRect().left;
         // cropping_audio = e.target.parentNode.parentNode;
         cropping_audio.addEventListener("mousemove", crop_audio_from_right);
@@ -248,23 +250,41 @@ track_list.addEventListener("mouseup", prevent_audio_move);
 track_list.addEventListener("mouseleave", prevent_audio_move);
 
 
+apply_change_button.addEventListener("click", () => {
+    cropping_audio.classList.add("cropped");
+    cropping_audio.querySelector(".crop-tool").dataset.state = "inactive";
+});
+
+
+discard_change_button.addEventListener("click", () => {
+    cropping_audio.querySelector(".crop-tool").dataset.state = "inactive";
+});
+
+
 const zoom_increment = 10;
 const tl_grid_min = 50;
 const tl_grid_max = 100;
 let supports_wheel = false;
 
-function track_zoom(e) {
+function track_zoom_with_wheel(e) {
     if (!e.ctrlKey) return;
     e.preventDefault();
 
     if (e.type == "wheel") supports_wheel = true;
     else if (supports_wheel) return;
-    let grid_space_count = timeline.querySelectorAll(".grid-space").length;
+
     let delta = ((e.deltaY || -e.wheelDelta || e.detail) >> 10) || 1;
+
+    if (delta > 0) track_zoom(false); // zoom out
+    else track_zoom(true); // zoom in
+}
+
+function track_zoom(zoom_in) {
+    let grid_space_count = timeline.querySelectorAll(".grid-space").length;
     let tl_grid_width = parseInt(get_custom_property('--_timeline-width', mixer.style.cssText));
     let multiplier = null;
 
-    if (delta > 0) {
+    if (!zoom_in) {
         if (5 <= grid_space_count && grid_space_count < 10 && tl_grid_width == tl_grid_min) return; // zoom out limit
         else if ((tl_grid_width -= zoom_increment) < tl_grid_min) {
             // halve the number of .grid-spaces
@@ -323,12 +343,12 @@ function track_zoom(e) {
             elem.style.left = `${offset * (new_track_width / initial_track_width)}px`;
         }
 
-        const crop_tool = elem.querySelector(".crop-tool");
-        const initial_crop_left = parseInt(get_custom_property("--_left", crop_tool.style.cssText));
-        const initial_crop_right = parseInt(get_custom_property("--_right", crop_tool.style.cssText));
+        // const crop_tool = elem.querySelector(".crop-tool");
+        const initial_crop_left = parseInt(get_custom_property("--_left", elem.style.cssText));
+        const initial_crop_right = parseInt(get_custom_property("--_right", elem.style.cssText));
 
-        crop_tool.style.setProperty("--_left", `${initial_crop_left * crop_ratio}px`);
-        crop_tool.style.setProperty("--_right", `${initial_crop_right * crop_ratio}px`);
+        elem.style.setProperty("--_left", `${initial_crop_left * crop_ratio}px`);
+        elem.style.setProperty("--_right", `${initial_crop_right * crop_ratio}px`);
     });
 
     // force slider to stay in the track if zoom out makes its left larger than track width
@@ -337,9 +357,13 @@ function track_zoom(e) {
     }
 }
 
-scroll_container.addEventListener("wheel", track_zoom);
-scroll_container.addEventListener("mousewheel", track_zoom);
-scroll_container.addEventListener("DOMMouseScroll", track_zoom);
+scroll_container.addEventListener("wheel", track_zoom_with_wheel);
+scroll_container.addEventListener("mousewheel", track_zoom_with_wheel);
+scroll_container.addEventListener("DOMMouseScroll", track_zoom_with_wheel);
+
+
+zoom_in_button.addEventListener("click", () => track_zoom(true));
+zoom_out_button.addEventListener("click", () => track_zoom(false));
 
 
 scroll_container.addEventListener("contextmenu", (e) => {
@@ -414,6 +438,14 @@ crop_button.addEventListener("click", () => {
 });
 
 
+restore_button.addEventListener("click", () => {
+    const audio_id = audio_controls.dataset.audioid;
+    track_list.querySelector(`.audio-wrapper[data-id="${audio_id}"]`).classList.remove("cropped");
+
+    audio_controls.dataset.state = "hidden";
+});
+
+
 volume.addEventListener("input", () => {
     audio_map.get(audio_controls.dataset.audioid).set("volume", volume.value);
     audio_map.get(audio_controls.dataset.audioid).get("wavesurfer").setVolume(volume.value);
@@ -466,9 +498,9 @@ play_button.addEventListener("click", () => {
         }
 
         // manage audio cropping
-        const crop_tool = elem.querySelector(".crop-tool");
-        const crop_left = parseInt(get_custom_property("--_left", crop_tool.style.cssText));
-        const crop_right = parseInt(get_custom_property("--_right", crop_tool.style.cssText));
+        // const crop_tool = elem.querySelector(".crop-tool");
+        const crop_left = parseInt(get_custom_property("--_left", elem.style.cssText));
+        const crop_right = parseInt(get_custom_property("--_right", elem.style.cssText));
         let start;
         let end;
 
