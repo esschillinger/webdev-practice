@@ -121,6 +121,10 @@ body {
     & button.icon-wrapper:has(.icon__xmark) {
         background: var(--color-red);
     }
+
+    & span {
+        line-height: 1;
+    }
 }
 
 .mixer:not(:has(.crop-tool[data-state="active"])) button.icon-wrapper:has(.icon__check, .icon__xmark) {
