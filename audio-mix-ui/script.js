@@ -21,6 +21,8 @@ const discard_change_button = mixer_toolbar.querySelector("button:has(.icon__xma
 const zoom_in_button = mixer_toolbar.querySelector("button:has(.icon__zoom-in)");
 const zoom_out_button = mixer_toolbar.querySelector("button:has(.icon__zoom-out)");
 
+const phantom_audio = document.getElementById("phantom-audio"); // 20Hz tone to keep audio drivers awake, fix sync issues
+
 let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted, delay (temp) }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
@@ -587,75 +589,92 @@ play_button.addEventListener("click", () => {
 
     // play audio outside of the config/preprocess forEach because setTime() takes a nonnegligible length of time to complete, even for small audio file sets
     // goal: reduce synchronization issues between audio progress relative to other files
+    // okay turns out the main problem is the audio drivers going to sleep but this still makes sense to do
     let timeouts = [];
 
-    for (const [k, v] of audio_map.entries()) {
-        if (!v.get("muted") && play_audio.get(k)) {
-            const wavesurfer = v.get("wavesurfer");
-            const end = v.get("end");
-            const delay = v.get("delay");
-            const current_time = wavesurfer.getCurrentTime() * 1000;
-
-            const t = setTimeout(() => {
-                wavesurfer.play();
-            }, delay);
+    function play_track() {
+        for (const [k, v] of audio_map.entries()) {
+            if (!v.get("muted") && play_audio.get(k)) {
+                const wavesurfer = v.get("wavesurfer");
+                const end = v.get("end");
+                const delay = v.get("delay");
+                const current_time = wavesurfer.getCurrentTime() * 1000;
+    
+                const t = setTimeout(() => {
+                    wavesurfer.play();
+                }, delay);
+                
+                timeouts.push(t);
+    
+                if (end != -1) {
+                    const t2 = setTimeout(() => {
+                        wavesurfer.pause();
+                    }, delay + end - current_time);
+    
+                    timeouts.push(t2);
+                }
+            }
+        }
+    
+        // duration, interval in ms
+        const interval = 50;
+        let remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
+    
+        let expected = Date.now() + interval;
+    
+        // self-adjusting timer
+        setTimeout(while_delay, interval);
+        function while_delay() {
+            let track_width = track_list.getBoundingClientRect().width; // continuously update to handle user zooming while audio playing
+            let pixels_per_interval = track_width / track_duration * interval / 1000;
+            let time_delta = Date.now() - expected;
+            if (time_delta > interval) expected += time_delta;
             
-            timeouts.push(t);
-
-            if (end != -1) {
-                const t2 = setTimeout(() => {
-                    wavesurfer.pause();
-                }, delay + end - current_time);
-
-                timeouts.push(t2);
+            slider_position += pixels_per_interval;
+            slider.style.left = `${slider_position}px`;
+    
+            // scroll with the slider as it's about to leave the view
+            if (slider_position > (scroll_container.scrollLeft + (0.9 * scroll_container.getBoundingClientRect().width))) {
+                scroll_container.scrollLeft = slider_position - (0.1 * scroll_container.getBoundingClientRect().width);
+            }
+    
+            if (!demo_playing) {
+                // user interrups playback, stop all tracks
+                for (const [k, v] of audio_map.entries()) {
+                    v.get("wavesurfer").pause();
+                }
+    
+                // prevent any audio playback not yet triggered from firing
+                timeouts.forEach((t) => {
+                    clearTimeout(t);
+                });
+    
+                phantom_audio.pause();
+    
+                return;
+            } else if ((remaining_duration -= interval) > 0) {
+                // track hasn't finished, continue playing
+                expected += interval;
+                setTimeout(while_delay, Math.max(0, interval - time_delta));
+            } else {
+                // demo reached "EOF"
+                demo_playing = false;
+                slider.style.left = `${track_width}px`;
+    
+                phantom_audio.pause();
+    
+                return;
             }
         }
     }
 
-    // duration, interval in ms
-    const interval = 50;
-    let remaining_duration = (track_width - slider_position) / track_width * track_duration * 1000;
-
-    let expected = Date.now() + interval;
-
-    // self-adjusting timer
-    setTimeout(while_delay, interval);
-    function while_delay() {
-        let track_width = track_list.getBoundingClientRect().width; // continuously update to handle user zooming while audio playing
-        let pixels_per_interval = track_width / track_duration * interval / 1000;
-        let time_delta = Date.now() - expected;
-        if (time_delta > interval) expected += time_delta;
-        
-        slider_position += pixels_per_interval;
-        slider.style.left = `${slider_position}px`;
-
-        // scroll with the slider as it's about to leave the view
-        if (slider_position > (scroll_container.scrollLeft + (0.9 * scroll_container.getBoundingClientRect().width))) {
-            scroll_container.scrollLeft = slider_position - (0.1 * scroll_container.getBoundingClientRect().width);
-        }
-
-        if (!demo_playing) {
-            // user interrups playback, stop all tracks
-            for (const [k, v] of audio_map.entries()) {
-                v.get("wavesurfer").pause();
-            }
-
-            // prevent any audio playback not yet triggered from firing
-            timeouts.forEach((t) => {
-                clearTimeout(t);
-            });
-
-            return;
-        } else if ((remaining_duration -= interval) > 0) {
-            // track hasn't finished, continue playing
-            expected += interval;
-            setTimeout(while_delay, Math.max(0, interval - time_delta));
-        } else {
-            // demo reached "EOF"
-            demo_playing = false;
-            slider.style.left = `${track_width}px`;
-
-            return;
+    function wait_for_drivers() {
+        if (phantom_audio.currentTime > 0) {
+            play_track();
+            phantom_audio.removeEventListener("timeupdate", wait_for_drivers);
         }
     }
+
+    phantom_audio.play();
+    phantom_audio.addEventListener("timeupdate", wait_for_drivers);
 });
