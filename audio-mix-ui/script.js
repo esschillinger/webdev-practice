@@ -23,6 +23,8 @@ const zoom_out_button = mixer_toolbar.querySelector("button:has(.icon__zoom-out)
 
 const phantom_audio = document.getElementById("phantom-audio"); // 20Hz tone to keep audio drivers awake, fix sync issues
 
+const time_controls = mixer.querySelector(".time-controls");
+
 let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted, delay (temp) }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
@@ -217,12 +219,22 @@ scroll_container.addEventListener("mousedown", function(e) {
     const cursor_left = this.scrollLeft + e.clientX - left_margin;
 
     if (!e.target.offsetParent || !["audio-wrapper", "crop-tool"].some(s => e.target.offsetParent.classList.contains(s) || e.target.offsetParent.parentNode.classList.contains(s))) {
-        if (cursor_left < track_list.getBoundingClientRect().width) {
+        const track_width = track_list.getBoundingClientRect().width;
+
+        if (cursor_left < track_width) {
             slider.style.left = `${cursor_left}px`;
+            time_controls.value = Math.floor(cursor_left / track_width * 100);
         }
     }
 
     audio_controls.dataset.state = "hidden";
+});
+
+
+time_controls.addEventListener("input", () => {
+    const track_width = track_list.getBoundingClientRect().width;
+
+    slider.style.left = `${time_controls.value * track_width / 100}px`;
 });
 
 
