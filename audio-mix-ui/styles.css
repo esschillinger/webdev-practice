@@ -211,7 +211,7 @@ body {
     & .timeline {
         --_timeline-std-height: 20px;
         display: grid;
-        grid-template-rows: calc(var(--_timeline-std-height) * 2 + 1rem);
+        grid-template-rows: calc(var(--_timeline-std-height) * 1.5 + 1rem);
         grid-template-columns: repeat(var(--_duration), var(--_timeline-width));
         grid-auto-flow: column;
     }
@@ -228,7 +228,7 @@ body {
 
     & .timeline > *:nth-child(5n) {
         position: relative;
-        height: calc(var(--_timeline-std-height) * 2);
+        height: calc(var(--_timeline-std-height) * 1.5);
         border-right: 2px solid var(--_tl-color-medium);
     }
 

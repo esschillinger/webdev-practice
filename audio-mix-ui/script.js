@@ -404,8 +404,9 @@ function track_zoom(zoom_in) {
         initial_track_width = track_list.getBoundingClientRect().width;
     }
 
+    const new_track_width = track_list.getBoundingClientRect().width;
+
     mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
-        const new_track_width = track_list.getBoundingClientRect().width;
         const audio_ratio = audio_map.get(elem.dataset.id).get("wavesurfer").getDuration() / track_duration;
         const initial_audio_width = parseInt(get_custom_property("--_audio-width", elem.style.cssText));
         const new_audio_width = audio_ratio * new_track_width;
@@ -425,9 +426,15 @@ function track_zoom(zoom_in) {
         elem.style.setProperty("--_right", `${initial_crop_right * crop_ratio}px`);
     });
 
+    const slider_position = slider.style.left === "" ? 0 : parseInt(slider.style.left);
+    const new_slider_position = slider_position * new_track_width / initial_track_width;
+
+    slider.style.left = `${new_slider_position}px`;
+
     // force slider to stay in the track if zoom out makes its left larger than track width
-    if (parseInt(slider.style.left) > track_list.getBoundingClientRect().width) {
-        slider.style.left = `${track_list.getBoundingClientRect().width}px`;
+    // deprecated after adding slider position adjustment, can probably safely remove this
+    if (new_slider_position > new_track_width) {
+        slider.style.left = `${new_track_width}px`;
     }
 }
 
@@ -650,6 +657,7 @@ play_button.addEventListener("click", () => {
                 });
     
                 phantom_audio.pause();
+                phantom_audio.currentTime = 0;
     
                 return;
             } else if ((remaining_duration -= interval) > 0) {
@@ -662,6 +670,7 @@ play_button.addEventListener("click", () => {
                 slider.style.left = `${track_width}px`;
     
                 phantom_audio.pause();
+                phantom_audio.currentTime = 0;
     
                 return;
             }
@@ -670,8 +679,8 @@ play_button.addEventListener("click", () => {
 
     function wait_for_drivers() {
         if (phantom_audio.currentTime > 0) {
-            play_track();
             phantom_audio.removeEventListener("timeupdate", wait_for_drivers);
+            play_track();
         }
     }
 
