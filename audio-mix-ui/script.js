@@ -6,7 +6,7 @@ const scroll_container = mixer.querySelector(".scroll-wrapper");
 const slider = mixer.querySelector(".slider");
 const timeline = mixer.querySelector(".timeline");
 const track_list = mixer.querySelector(".track-list");
-const play_button = mixer.querySelector("button.play-button");
+const play_button = mixer.querySelector("button:has(.icon__play)");
 
 const audio_controls = document.querySelector("#audio-controls");
 const mute_button = audio_controls.querySelector("#mute");
@@ -21,12 +21,12 @@ const discard_change_button = mixer_toolbar.querySelector("button:has(.icon__xma
 const zoom_in_button = mixer_toolbar.querySelector("button:has(.icon__zoom-in)");
 const zoom_out_button = mixer_toolbar.querySelector("button:has(.icon__zoom-out)");
 
-let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted }
+let audio_map = new Map(); // audio_id : { wavesurfer, delay, start, end, volume, muted, delay (temp) }
 let total_wavesurfers = mixer.querySelectorAll('.audio-wrapper').length;
 let ready_wavesurfers = 0;
 let track_duration;
 
-let draggable_audio;
+let dragging_audio;
 let initial_audio_left;
 
 let demo_playing = false;
@@ -63,10 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
-    // const css = elem.style.cssText;
-    // const color_property = css.split(";").find(style => style.includes("--_color"));
-    // const color = color_property.slice(color_property.indexOf(":") + 1, color_property.indexOf(")") + 1);
-
     const color = get_custom_property("--_color", elem.style.cssText);
     const height = elem.getBoundingClientRect().height;
 
@@ -99,7 +95,6 @@ mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
 
         const left = wavesurfer_map.get("start") / wavesurfer.getDuration() * audio_width;
         const right = wavesurfer_map.get("end") == -1 ? audio_width : wavesurfer_map.get("end") / wavesurfer.getDuration() * audio_width;
-        // const crop_tool = elem.querySelector('.crop-tool');
 
         elem.style.setProperty("--_left", `${left}px`);
         elem.style.setProperty("--_right", `${right}px`);
@@ -122,27 +117,36 @@ mixer.querySelectorAll(".audio-wrapper").forEach((elem) => {
 function move_audio(e) {
     const container_rect = scroll_container.getBoundingClientRect();
     const left_margin = container_rect.left;
-    const audio_rect = draggable_audio.getBoundingClientRect();
+    const audio_rect = dragging_audio.getBoundingClientRect();
     const cursor_left = scroll_container.scrollLeft + e.clientX - left_margin; // cursor left, relative to scroll container
     const track_width = track_list.getBoundingClientRect().width;
+    const crop_left = parseInt(get_custom_property("--_left", dragging_audio.style.cssText));
+    const crop_right = parseInt(get_custom_property("--_right", dragging_audio.style.cssText));
+
+    let min_left = 0;
+    let max_left = track_width - audio_rect.width;
+
+    if (dragging_audio.querySelector(".crop-tool").dataset.state == "inactive") {
+        if (crop_left > 0) min_left = -1 * crop_left;
+        if (crop_right < audio_rect.width) max_left = track_width - crop_right;
+    }
     
-    if (!draggable_audio.style.left) {
-        draggable_audio.style.left = `${audio_rect.left}px`;
+    if (!dragging_audio.style.left) {
+        dragging_audio.style.left = `${audio_rect.left}px`;
     }
 
     let new_audio_left = cursor_left - initial_audio_left;
-    if (new_audio_left < 0) new_audio_left = 0;
-    else if (new_audio_left + audio_rect.width > track_width) {
-        new_audio_left = track_width - audio_rect.width;
-    }
 
-    draggable_audio.style.left = `${new_audio_left}px`;
+    if (new_audio_left < min_left) new_audio_left = min_left;
+    else if (new_audio_left > max_left) new_audio_left = max_left;
+
+    dragging_audio.style.left = `${new_audio_left}px`;
 }
 
 
 function prevent_audio_move() {
-    if (draggable_audio) {
-        draggable_audio = null;
+    if (dragging_audio) {
+        dragging_audio = null;
         initial_audio_left = null;
         
         track_list.removeEventListener("mousemove", move_audio);
@@ -224,21 +228,21 @@ let cropping_audio;
 
 track_list.addEventListener("mousedown", function(e) {
     if (e.target.offsetParent && e.target.offsetParent.classList.contains("audio-wrapper")) {
-        draggable_audio = e.target.offsetParent;
-        initial_audio_left = e.clientX - draggable_audio.getBoundingClientRect().left;
+        dragging_audio = e.target.offsetParent;
+        initial_audio_left = e.clientX - dragging_audio.getBoundingClientRect().left;
         
         track_list.addEventListener("mousemove", move_audio);
 
     } else if (e.target.classList.contains("crop__left-handle") || e.target.offsetParent.classList.contains("crop__left-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__left-handle").getBoundingClientRect().right;
-        // cropping_audio = e.target.parentNode.parentNode;
+        
         cropping_audio.addEventListener("mousemove", crop_audio_from_left);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);
         cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
 
     } else if (e.target.classList.contains("crop__right-handle") || e.target.offsetParent.classList.contains("crop__right-handle")) {
         initial_crop_bar_left = e.clientX - cropping_audio.querySelector(".crop__right-handle").getBoundingClientRect().left;
-        // cropping_audio = e.target.parentNode.parentNode;
+        
         cropping_audio.addEventListener("mousemove", crop_audio_from_right);
         cropping_audio.addEventListener("mouseup", prevent_audio_crop);
         cropping_audio.addEventListener("mouseleave", prevent_audio_crop);
@@ -281,6 +285,17 @@ apply_change_button.addEventListener("click", () => {
 });
 
 
+function keep_audio_within_bounds(audio_id) {
+    const audio_wrapper = track_list.querySelector(`.audio-wrapper[data-id="${audio_id}"]`);
+    const audio_left = audio_wrapper.style.left === "" ? 0 : parseInt(audio_wrapper.style.left);
+    const audio_width = audio_wrapper.getBoundingClientRect().width;
+    const track_width = track_list.getBoundingClientRect().width;
+
+    if (audio_left < 0) audio_wrapper.style.left = "0px";
+    else if (audio_left + audio_width > track_width) audio_wrapper.style.left = `${track_width - audio_width}px`;
+}
+
+
 function revert_crop(audio_id) {
     const audio_wrapper = track_list.querySelector(`.audio-wrapper[data-id="${audio_id}"]`);
     const audio_width = audio_wrapper.getBoundingClientRect().width;
@@ -307,6 +322,8 @@ function revert_crop(audio_id) {
     
     crop_tool.style.setProperty("--_crop-left-overflow", `${left_overflow}px`);
     crop_tool.style.setProperty("--_crop-right-overflow", `${right_overflow}px`);
+
+    keep_audio_within_bounds(audio_id);
 }
 
 
@@ -399,7 +416,6 @@ function track_zoom(zoom_in) {
             elem.style.left = `${offset * (new_track_width / initial_track_width)}px`;
         }
 
-        // const crop_tool = elem.querySelector(".crop-tool");
         const initial_crop_left = parseInt(get_custom_property("--_left", elem.style.cssText));
         const initial_crop_right = parseInt(get_custom_property("--_right", elem.style.cssText));
 
@@ -489,8 +505,9 @@ crop_button.addEventListener("click", () => {
 
     } else {
         crop_tool.dataset.state = "active";
+
+        keep_audio_within_bounds(cropping_audio.dataset.id);
     }
-    // crop_tool.dataset.state = crop_tool.dataset.state == "active" ? "inactive" : "active";
 
     audio_controls.dataset.state = "hidden";
 });
@@ -533,9 +550,15 @@ play_button.addEventListener("click", () => {
 
     mixer.querySelectorAll('.audio-wrapper:not([data-muted="true"])').forEach((elem) => {
         const audio_width = parseInt(get_custom_property("--_audio-width", elem.style.cssText));
-        const audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
-        const audio_end = audio_start + audio_width;
-        const wavesurfer = audio_map.get(elem.dataset.id).get("wavesurfer");
+        const left_crop = parseInt(get_custom_property("--_left", elem.style.cssText));
+        const right_crop = parseInt(get_custom_property("--_right", elem.style.cssText));
+        const audio_data = audio_map.get(elem.dataset.id);
+        const wavesurfer = audio_data.get("wavesurfer");
+        
+        let audio_start = elem.style.left === "" ? 0 : parseInt(elem.style.left);
+        audio_start += left_crop;
+
+        const audio_end = audio_start + right_crop - left_crop;
 
         // set audio delays
         if (slider_position < audio_end) {
@@ -545,13 +568,14 @@ play_button.addEventListener("click", () => {
 
             if (slider_position > audio_start) {
                 // slider is in the middle of current audio file, set playback position
-                const audio_ratio = (slider_position - audio_start) / (audio_end - audio_start);
+                // const audio_ratio = (slider_position - audio_start) / (audio_end - audio_start);
+                const audio_ratio = (slider_position - audio_start + left_crop) / (audio_width);
                 wavesurfer.setTime(wavesurfer.getDuration() * audio_ratio);
                 
                 delay = 0;
             } else {
                 // audio occurs later and needs a delay
-                wavesurfer.setTime(0);
+                wavesurfer.setTime(audio_data.get("start") / 1000);
                 
                 const ratio = (audio_start - slider_position) / track_width;
                 delay = ratio * track_duration * 1000; // convert s to ms
@@ -568,22 +592,20 @@ play_button.addEventListener("click", () => {
     for (const [k, v] of audio_map.entries()) {
         if (!v.get("muted") && play_audio.get(k)) {
             const wavesurfer = v.get("wavesurfer");
-            const start = v.get("start");
             const end = v.get("end");
             const delay = v.get("delay");
-
-            if (start != 0) v.get("wavesurfer").setTime(start / 1000);
+            const current_time = wavesurfer.getCurrentTime() * 1000;
 
             const t = setTimeout(() => {
                 wavesurfer.play();
-            }, delay + start);
+            }, delay);
             
             timeouts.push(t);
 
             if (end != -1) {
                 const t2 = setTimeout(() => {
                     wavesurfer.pause();
-                }, delay + end);
+                }, delay + end - current_time);
 
                 timeouts.push(t2);
             }

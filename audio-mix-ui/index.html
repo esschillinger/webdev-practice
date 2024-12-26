@@ -11,15 +11,9 @@
 <body>
     <!--
         TODO:
-            1. snap-to-grid to move audio tracks
-            2. manipulate audio with right click
-                2.a. hide on any action outside of scroll_container (scroll_container -> blur)
-                2.b. options
-                    2.b.1. crop
-                    2.b.2. remove from mix (NOT delete attachment; also notify that this will remove from highlight layer)
-            3. true audio mixing
-                3.a. add effects (reverb, filters, etc)
-            4. map .slider to input[type="range"] (bidirectionally)
+            1. true audio mixing
+                1.a. add effects (reverb, filters, etc)
+            2. map .slider to input[type="range"] (bidirectionally)
      -->
     
     <div id="audio-controls" data-state="hidden">
@@ -143,9 +137,9 @@
 
 
         <div class="controls">
-            <button class="play-button">Play</button>
+            <button class="icon-wrapper"><i class="icon icon__play"></i></button>
             <input type="range" class="time-controls" min="0" max="100" value="50"> <!-- use ms or 1/100s -->
-            <button>Settings</button>
+            <button class="icon-wrapper"><i class="icon icon__gear"></i></button>
         </div>
     </div>
     <script type="module" src="script.js"></script>

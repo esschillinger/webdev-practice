@@ -21,6 +21,14 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+.icon__gear {
+    mask-image: url("gear-solid.svg");
+}
+
+.icon__play {
+    mask-image: url("play-solid.svg");
+}
+
 .icon__check {
     mask-image: url("check-solid.svg");
 }
@@ -430,7 +438,6 @@ body {
 .mixer > .controls {
     display: flex;
     align-items: center;
-    padding: 1rem;
     gap: 1rem;
 
     & .time-controls {
