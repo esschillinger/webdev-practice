@@ -58,18 +58,13 @@ button.icon-wrapper:has(i, div + span):active:hover {
 }
 
 .icon-wrapper > i.icon {
-    --_icon-color: var(--color-text);
-    /* mask-size: cover; */
+    --_icon-color: var(--color-text, black);
+    
     mask-repeat: no-repeat;
     mask-position: center;
     border-color: transparent;
     background-color: var(--_icon-color);
     transition: background-color 250ms ease;
-
-    /* object-fit: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-color: transparent; */
 }
 
 .icon-wrapper > span.icon__description {
