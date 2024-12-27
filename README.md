@@ -10,7 +10,9 @@ Some of these components may be refined into their own repositories to allow for
 
 ### audio-mix-ui\*
 
-An interface for arranging, editing, and playing audio files. Right-click to mute audio and adjust volume, and zoom in or out within the tracks via `CTRL + mousewheel`. Track cropping/trimming currently being implemented.
+Now has its own repository for modularization. Check out [audio-mixer](https://github.com/esschillinger/audio-mixer) for the most up-to-date version.
+
+An interface for arranging, editing, and playing audio files. Right-click to crop, mute audio, and adjust volume, and zoom in or out within the tracks via the zoom buttons in the toolbar or `CTRL + mousewheel`.
 
 Technically a bit of a misnomer, as audio mixing capabilities are not the primary focus of this tool, though I may add some in the future. This component is likely to become a separate repository.
 
