@@ -1,75 +1,25 @@
-*,
-*::before,
-*::after {
-    box-sizing: inherit;
-}
-
-html {
-    box-sizing: border-box;
-}
-
-body {
-    /* set text color for icons */
-    --color-text: black;
-
-    margin: 0;
-    width: 100dvw;
-    height: 100dvh;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
-    font-family: 'Open Sans', sans-serif;
-}
-
-.icon__gear {
-    mask-image: url("gear-solid.svg");
-}
-
-.icon__play {
-    mask-image: url("play-solid.svg");
-}
-
-.icon__check {
-    mask-image: url("check-solid.svg");
-}
-
-.icon__xmark {
-    mask-image: url("xmark-solid.svg");
-}
-
-.icon__zoom-in {
-    mask-image: url("magnifying-glass-plus-solid.svg");
-}
-
-.icon__zoom-out {
-    mask-image: url("magnifying-glass-minus-solid.svg");
-}
-
-.icon__left-chevron {
-    mask-image: url("chevron-left-solid.svg");
-}
-
-.icon__right-chevron {
-    mask-image: url("chevron-right-solid.svg");
+:root {
+    --color-red: rgb(208, 37, 37);
+    --color-green: rgb(78, 147, 122);
 }
 
 .mixer {
     /* duration in seconds (for now) */
-    --_duration: 40;
+    --_duration: 20;
     --_timeline-width: 100px;
     --_timeline-space-duration: 1;
     --_track-width: calc(var(--_duration) * var(--_timeline-width) / var(--_timeline-space-duration));
-    --_bg-color: hsl(0, 0%, 50%);
-    --_accent-color: #ffd2a7;
-    /* --_track-count: 5; */
+    --_bg-color: #1d1b1a;
+    --_bg-secondary-color: #4a4948;
+    --_text-color: #f7f4f2;
+    --_accent-color: #78a9ed;
+    /* --_accent-color: #ffd2a7; */
+    --_icon-color: var(--_text-color) !important;
 
     isolation: isolate;
     position: relative;
-    /* width: 80dvw; */
-    height: 60dvh;
-    /* height: fit-content; */
-    /* max-height: min(fit-content, 60dvh); */
-    aspect-ratio: 2 / 1;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -78,6 +28,11 @@ body {
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.5);
+    color: var(--_text-color);
+
+    & button.icon-wrapper > i.icon {
+        --_icon-color: var(--_text-color);
+    }
 }
 
 .mixer[data-state="loading"] {
@@ -90,17 +45,6 @@ body {
         border-radius: inherit;
         backdrop-filter: blur(5px) saturate(180%);
     }
-
-    /* &::after {
-        content: url("loading.gif");
-        z-index: 10;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        height: 20%;
-        aspect-ratio: 1;
-        transform: translate(-50%, -50%) scale(0.5);
-    } */
 }
 
 .mixer > #phantom-audio {
@@ -117,17 +61,18 @@ body {
         display: flex;
     }
 
-    & .icon-wrapper {
+    & button.icon-wrapper {
         padding: 0.5rem;
         border-radius: 0.5rem;
+        color: inherit;
     }
 
     & button.icon-wrapper:has(.icon__check) {
-        background: var(--color-viridian);
+        background: var(--color-green);
     }
 
     & button.icon-wrapper:has(.icon__xmark) {
-        background: var(--color-red);
+        background: hsl(from var(--color-red) h s calc(l * 0.8));
     }
 
     & span {
@@ -139,9 +84,12 @@ body {
     display: none;
 }
 
-.mixer > .main-wrapper {
+.mixer > .mixer__main-wrapper {
+    flex-grow: 1;
     overflow: hidden;
-    /* padding-inline: 1rem; */
+    padding-block: 1rem;
+    border-top: 1px solid var(--_bg-secondary-color);
+    border-bottom: 1px solid var(--_bg-secondary-color);
     
     & .scroll-wrapper {
         position: relative;
@@ -156,7 +104,7 @@ body {
     --_slider-width: 2px;
     --_handle-width: 20px;
     --_handle-height: calc(var(--_handle-width) / 2);
-    --_handle-color: var(--color-blue);
+    --_handle-color: var(--_accent-color);
 
     z-index: 5;
     position: absolute;
@@ -195,9 +143,7 @@ body {
 }
 
 .mixer .timeline-wrapper {
-    --_tl-color-soft: hsl(from var(--_bg-color) h s calc(l * 1.1));
-    --_tl-color-medium: hsl(from var(--_bg-color) h s calc(l * 1.5));
-    --_tl-color-heavy: hsl(from var(--_bg-color) h s calc(l * 2));
+    --_tl-color-soft: hsl(from var(--_text-color) h s calc(l * 0.5));
 
     /* use z-index: 4 to cover .crop-tool and canvas elements in shadow DOM (they must use z-index: 2 or something) */
     z-index: 4;
@@ -219,17 +165,26 @@ body {
     & .timeline > * {
         align-self: end;
     }
-
+    
     & .timeline > *:not(:nth-child(5n)) {
         height: var(--_timeline-std-height);
-        border-left: 1px solid var(--_tl-color-soft);
         border-right: 1px solid var(--_tl-color-soft);
+    }
+    
+    & .timeline > *:first-child {
+        height: calc(var(--_timeline-std-height) * 1.5);
+        border-left: 2px solid var(--_text-color);
+        border-right: none;
+    }
+
+    & .timeline > *:nth-child(2) {
+        border-left: 1px solid var(--_tl-color-soft);
     }
 
     & .timeline > *:nth-child(5n) {
         position: relative;
         height: calc(var(--_timeline-std-height) * 1.5);
-        border-right: 2px solid var(--_tl-color-medium);
+        border-right: 2px solid var(--_text-color);
     }
 
     & .timeline > *:nth-child(5n)::before {
@@ -239,7 +194,7 @@ body {
         right: 0;
         transform: translate(50%, -100%);
         line-height: 1;
-        color: var(--_tl-color-heavy);
+        color: var(--_text-color);
     }
 }
 
@@ -256,7 +211,7 @@ body {
     & .track {
         flex-shrink: 0;
         height: var(--_track-height);
-        background: hsl(from var(--_bg-color) h s calc(l * 0.8));
+        background: hsl(from var(--_bg-color) h s calc(l * 1.5));
     }
 }
 
@@ -329,7 +284,7 @@ body {
     & .crop-tool {
         --_bar-width: 30px;
         --_border-width: calc(var(--_bar-width) / 6);
-        --_crop-color: yellow;
+        --_crop-color: #ffd2a7;
 
         --_top: var(--_border-width);
         --_bottom: calc(var(--_track-height) - var(--_border-width));
@@ -432,6 +387,10 @@ body {
         /* i have no idea why bottom: 0 isn't working */
         top: var(--_bottom);
         /* top: revert; */
+    }
+
+    & button.icon-wrapper > i.icon {
+        --_icon-color: var(--_bg-color);
     }
 }
 

@@ -3,144 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Arranger</title>
-    <link rel="stylesheet" href="/colors.css">
-    <link rel="stylesheet" href="/utility_classes.css">
-    <link rel="stylesheet" href="styles.css">
+    <title>Modularized Audio Mixer</title>
+    <link rel="stylesheet" href="icons.css">
+    <link rel="stylesheet" href="mixer.css">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        html {
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            width: 100dvw;
+            height: 100dvh;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(45deg, #45a25f, #f4c547, #d76c22);
+        }
+
+        .test-container {
+            width: 60dvw;
+            height: 60dvh;
+        }
+
+        .mixer-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .mixer-controls > button {
+            font-family: inherit;
+            padding: 2ch;
+            cursor: pointer;
+            border-radius: 1ch;
+        }
+    </style>
 </head>
 <body>
-    <!--
-        TODO:
-            1. true audio mixing
-                1.a. add effects (reverb, filters, etc)
-     -->
-    
-    <div id="audio-controls" data-state="hidden">
-        <div class="control"><button id="mute">Mute</button></div>
-        <div class="control"><button id="unmute" disabled>Unmute</button></div>
-        <div class="control"><button id="crop">Crop</button></div>
-        <div class="control"><button id="restore">Restore</button></div>
-        <div class="control">
-            <input type="range" id="volume" min="0.01" max="1" step="0.01" value="1">
-        </div>
+    <div class="test-container"></div>
+
+    <div class="mixer-controls">
+        <button id="export">View track data (console log)</button>
+        <button id="delete">Delete track</button>
+        <button id="reset">Reset mixer</button>
     </div>
-    
-    <div class="mixer" style="--_duration: 20; --_timeline-width: 50px; --_timeline-space-duration: 1;" data-state="loading">
-        <audio src="20Hz-tone.webm" id="phantom-audio" loop="true" volume="0.01"></audio>
 
-        <div class="mixer__toolbar">
-            <button class="icon-wrapper">
-                <i class="icon icon__xmark"></i>
-                <span>Discard changes</span>
-            </button>
-            <button class="icon-wrapper">
-                <i class="icon icon__check"></i>
-                <span>Apply changes</span>
-            </button>
-            <div class="action-group">
-                <button class="icon-wrapper">
-                    <i class="icon icon__zoom-out"></i>
-                </button>
-                <button class="icon-wrapper">
-                    <i class="icon icon__zoom-in"></i>
-                </button>
-            </div>
-        </div>
-        
-        <div class="main-wrapper">
-            <!-- <div class="track-controls">
-                
-            </div> -->
-    
-            
-            <div class="scroll-wrapper">
-                <div class="slider"></div>
-                
-                <div class="timeline-wrapper">
-                    <div class="timeline">
-                        <!-- .grid-space elements created and attached dynamically -->
-                    </div>
-                </div>
-
-                <div class="track-list">
-                    <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(207, 90%, 54%);" data-id="0" data-file="test_audio.ogg">
-                            <div class="crop-tool" data-state="inactive">
-                                <button class="crop__left-handle icon-wrapper">
-                                    <i class="icon icon__left-chevron"></i>
-                                </button>
-                                <button class="crop__right-handle icon-wrapper">
-                                    <i class="icon icon__right-chevron"></i>
-                                </button>
-                                <div class="crop__top-border"></div>
-                                <div class="crop__bottom-border"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(266, 100%, 64%);" data-id="1" data-file="test_audio.ogg">
-                            <div class="crop-tool" data-state="inactive">
-                                <button class="crop__left-handle icon-wrapper">
-                                    <i class="icon icon__left-chevron"></i>
-                                </button>
-                                <button class="crop__right-handle icon-wrapper">
-                                    <i class="icon icon__right-chevron"></i>
-                                </button>
-                                <div class="crop__top-border"></div>
-                                <div class="crop__bottom-border"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(0, 70%, 48%);" data-id="2" data-file="test_audio.ogg">
-                            <div class="crop-tool" data-state="inactive">
-                                <button class="crop__left-handle icon-wrapper">
-                                    <i class="icon icon__left-chevron"></i>
-                                </button>
-                                <button class="crop__right-handle icon-wrapper">
-                                    <i class="icon icon__right-chevron"></i>
-                                </button>
-                                <div class="crop__top-border"></div>
-                                <div class="crop__bottom-border"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="track">
-                        <div class="audio-wrapper" style="--_color: hsl(136, 54%, 43%);" data-id="3" data-file="test_audio.ogg">
-                            <div class="crop-tool" data-state="inactive">
-                                <button class="crop__left-handle icon-wrapper">
-                                    <i class="icon icon__left-chevron"></i>
-                                </button>
-                                <button class="crop__right-handle icon-wrapper">
-                                    <i class="icon icon__right-chevron"></i>
-                                </button>
-                                <div class="crop__top-border"></div>
-                                <div class="crop__bottom-border"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                    <div class="track"></div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="controls">
-            <button class="icon-wrapper"><i class="icon icon__play"></i></button>
-            <input type="range" class="time-controls" min="0" max="100"> <!-- use ms or 1/100s -->
-            <button class="icon-wrapper"><i class="icon icon__gear"></i></button>
-        </div>
-    </div>
     <script type="module" src="script.js"></script>
 </body>
 </html>
