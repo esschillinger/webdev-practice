@@ -1,0 +1,87 @@
+.context-menu {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    background: rgb(from #f6f8fa r g b / 0.9);
+    backdrop-filter: blur(10px) saturate(110%);
+    color: var(--color-text);
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow-floating);
+}
+
+.context-menu * {
+    text-wrap: nowrap;
+}
+
+.context-menu button {
+    font-family: inherit;
+    background: none;
+    border: none;
+}
+
+.context-menu .icon-wrapper {
+    padding: 0.5rem;
+}
+
+.context-menu .action {
+    border-radius: 5px;
+    transition: background-color 150ms ease;
+
+    &:hover {
+        background-color: var(--color-hover);
+    }
+}
+
+.context-menu > .standard-actions {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+
+    &:first-child {
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    &:last-child {
+        border-top: 1px solid var(--color-border);
+    }
+}
+
+.context-menu > .action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-inline: 5px;
+    padding-block: 5px;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
+.context-menu .row-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+.context-menu button.row-action,
+.context-menu button.row-action * {
+    cursor: pointer;
+}
+
+.context-menu .row-action .icon-wrapper {
+    padding: 0;
+}
+
+.context-menu .row-action > .additional-details {
+    font-size: 0.65rem;
+    color: var(--color-secondary-text);
+
+    & .icon {
+        --_icon-color: var(--color-secondary-text);
+    }
+}

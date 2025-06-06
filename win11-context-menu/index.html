@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Context Menu</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="context-menu.css">
+    <link rel="stylesheet" href="/icons.css">
+</head>
+<body>
+    <p>Right-click anywhere on the screen to bring up the context menu</p>
+
+    <div id="context-menu" class="context-menu" popover>
+        <div class="standard-actions">
+            <button class="action icon-wrapper" title="Cut">
+                <i class="icon icon__scissors"></i>
+            </button>
+            <button class="action icon-wrapper" title="Copy">
+                <i class="icon icon__regular icon__copy"></i>
+            </button>
+            <button class="action icon-wrapper" title="Rename">
+                <i class="icon icon__rename"></i>
+            </button>
+            <button class="action icon-wrapper" title="Share">
+                <i class="icon icon__share"></i>
+            </button>
+            <button class="action icon-wrapper" title="Delete">
+                <i class="icon icon__delete"></i>
+            </button>
+        </div>
+        <div class="action-group">
+            <button class="action row-action">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__image"></i>
+                    <label class="icon__description">Open</label>
+                </div>
+                <span class="additional-details">Enter</span>
+            </button>
+            <div class="action row-action" tabindex="0">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__list"></i>
+                    <label class="icon__description">Open with</label>
+                </div>
+                <div class="additional-details icon-wrapper no-background">
+                    <i class="icon icon__small icon__right-chevron"></i>
+                </div>
+
+                <div class="context-menu" popover>
+                    <div class="action-group">
+                        <button class="action row-action">Paint</button>
+                        <button class="action row-action">Photos</button>
+                        <button class="action row-action">Snipping Tool</button>
+                        <button class="action row-action">Search the Microsoft Store</button>
+                        <button class="action row-action">Choose another app</button>
+                    </div>
+                </div>
+            </div>
+            <button class="action row-action">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__phone"></i>
+                    <label class="icon__description">Send to my phone</label>
+                </div>
+            </button>
+            <button class="action row-action">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__folder"></i>
+                    <label class="icon__description">Compress to ZIP file</label>
+                </div>
+            </button>
+            <button class="action row-action">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__list"></i>
+                    <label class="icon__description">Properties</label>
+                </div>
+                <span class="additional-details">Alt+Enter</span>
+            </button>
+        </div>
+        <div class="action-group">
+            <button class="action row-action">
+                <div class="icon-wrapper no-background">
+                    <i class="icon icon__more-options"></i>
+                    <label class="icon__description">Show more options</label>
+                </div>
+                <span class="additional-details">Shift+F10</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="context-menu.js"></script>
+</body>
+</html>

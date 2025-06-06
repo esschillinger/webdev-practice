@@ -1,0 +1,30 @@
+:root {
+    --color-text: #27292c;
+    --color-secondary-text: #656971;
+    --color-border: #d3d9e6;
+    --color-hover: #d7dbe3;
+
+    --box-shadow-floating:
+        0px 0px 0px 1px #d1d9e080,
+        0px 6px 12px -3px #25292e0a,
+        0px 6px 18px 0px #25292e1f;
+}
+
+body {
+    height: 100dvh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Open Sans', sans-serif;
+    background-image: url("./background.jpg");
+    background-size: cover;
+}
+
+p {
+    color: white;
+    text-shadow: 1px 1px black;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+}
