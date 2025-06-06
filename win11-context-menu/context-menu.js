@@ -26,10 +26,20 @@ function showMainContextMenu(e) {
     if (document.activeElement === contextMenu || contextMenu.contains(document.activeElement)) return;
 
     e.preventDefault();
-
-    contextMenu.style.left = `${e.clientX}px`;
-    contextMenu.style.top = `${e.clientY}px`;
     contextMenu.showPopover();
+
+    const boundingRect = contextMenu.getBoundingClientRect();
+
+    let horizontalPlacement = "right";
+
+    if (e.clientX + boundingRect.width > window.innerWidth) {
+        contextMenu.style.left = `${e.clientX - boundingRect.width}px`;
+        horizontalPlacement = "left";
+    }
+    else contextMenu.style.left = `${e.clientX}px`;
+
+    if (e.clientY + boundingRect.height > window.innerHeight) contextMenu.style.top = `${e.clientY - boundingRect.height}px`;
+    else contextMenu.style.top = `${e.clientY}px`;
 
     const nestedPopovers = [...contextMenu.querySelectorAll(".context-menu")];
 
@@ -41,11 +51,13 @@ function showMainContextMenu(e) {
         ancestorPopover.showPopover();
 
         const containingBlock = p.parentElement;
-        const boundingRect = containingBlock.getBoundingClientRect();
+        const subBoundingRect = containingBlock.getBoundingClientRect();
+        const thisBoundingRect = p.getBoundingClientRect();
 
-        p.style.left = `${boundingRect.right}px`;
-        p.style.top = `${boundingRect.top}px`;
-        
+        if (horizontalPlacement == "right") p.style.left = `${subBoundingRect.right}px`;
+        else p.style.left = `${subBoundingRect.left - thisBoundingRect.width}px`;
+
+        p.style.top = `${subBoundingRect.top}px`;
     });
 
     nestedPopovers.forEach(p => {
