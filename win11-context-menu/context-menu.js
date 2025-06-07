@@ -111,7 +111,7 @@ export default class ContextMenu {
     
     initialize() {
         this.#container.classContext = this;
-        this.#container.appendChild(this.#root);
+        this.#container.prepend(this.#root);
 
         if (!this.#isSubMenu) this.#container.addEventListener("contextmenu", this.#showMainContextMenu);
 
