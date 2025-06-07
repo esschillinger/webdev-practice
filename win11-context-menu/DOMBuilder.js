@@ -57,7 +57,6 @@ function create_icon(options, returnIcon = false) {
 
     const wrapper = create_element(type, wrapper_attributes);
 
-    let icon_modifiers = [];
     const i = create_element("i", { classes : ["icon", `icon__${attributes.icon}`].concat(attributes.iconModifiers) });
     wrapper.appendChild(i);
 

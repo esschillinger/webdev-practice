@@ -68,7 +68,8 @@ const mainMenu = new ContextMenu({
                     type : "button",
                     icon : "image",
                     label : "Open",
-                    details : "Enter"
+                    details : "Enter",
+                    onclick : () => { console.log("hello!"); }
                 },
                 {
                     type : "context-menu",

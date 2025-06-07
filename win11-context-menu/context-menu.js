@@ -61,6 +61,8 @@ export default class ContextMenu {
                             button.appendChild(details);
                         }
 
+                        button.addEventListener("click", action.onclick);
+
                     } else if (action.type == "context-menu") {
                         const subMenu = create_element("div", {
                             classes : ["action", "row-action"],
